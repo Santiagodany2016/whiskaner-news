@@ -1,0 +1,13 @@
+{
+  "name": "whisky-news-static",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.js"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "rss-parser": "^3.13.0"
+  }
+}

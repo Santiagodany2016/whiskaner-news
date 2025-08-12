@@ -1,0 +1,30 @@
+# Edita estas fuentes a tu gusto
+# type: article | video | podcast | book | event
+# region: global | us | uk | eu | jp | etc.
+
+sources:
+  - name: Whisky Advocate
+    url: https://whiskyadvocate.com/feed/
+    type: article
+    region: us
+
+  - name: The Whiskey Wash
+    url: https://thewhiskeywash.com/feed/
+    type: article
+    region: us
+
+  - name: Master of Malt Blog
+    url: https://www.masterofmalt.com/blog/feed/
+    type: article
+    region: uk
+
+  - name: Reddit r/Scotch
+    url: https://www.reddit.com/r/Scotch/.rss
+    type: article
+    region: global
+
+  # Ejemplo YouTube (reemplaza con tu channel_id)
+  # - name: YouTube - Whisky.com
+  #   url: https://www.youtube.com/feeds/videos.xml?channel_id=UC5n1hE7E3O0XfO6K2Fz4J0g
+  #   type: video
+  #   region: global
