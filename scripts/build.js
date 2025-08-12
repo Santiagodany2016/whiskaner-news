@@ -1,4 +1,3 @@
-// scripts/build.js
 // Agrega RSS/Atom -> docs/feed.json (sin base de datos)
 import fs from "fs";
 import path from "path";
@@ -26,7 +25,6 @@ function guessTypeFromUrl(url) {
 }
 
 function firstImage(entry) {
-  // intenta enclosure / media:thumbnail / img en content
   if (entry.enclosure && entry.enclosure.url) return entry.enclosure.url;
   const content = String(entry["content:encoded"] || entry.content || "");
   const m = content.match(/<img[^>]+src=["']([^"']+)["']/i);
@@ -72,9 +70,7 @@ async function main() {
 
   // dedupe por url
   const map = new Map();
-  for (const it of items) {
-    if (!map.has(it.url)) map.set(it.url, it);
-  }
+  for (const it of items) if (!map.has(it.url)) map.set(it.url, it);
   const deduped = Array.from(map.values());
 
   // ordenar por fecha si existe
@@ -94,7 +90,4 @@ async function main() {
   console.log("OK ->", OUTPUT_FILE, "items:", out.items.length);
 }
 
-main().catch(e => {
-  console.error(e);
-  process.exit(1);
-});
+main().catch(e => { console.error(e); process.exit(1); });
