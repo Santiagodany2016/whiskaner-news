@@ -49,11 +49,11 @@
         meta.textContent = `${it.source} • ${date}`;
         const tags = document.createElement('div'); tags.className = 'meta';
         tags.innerHTML = `<span class="badge">${it.type}</span><span class="badge">${it.region}</span>`;
+        right.prepend(meta); right.prepend(a); right.appendChild(tags);
         if (it.summary) {
           const p = document.createElement('div'); p.className = 'meta'; p.style.marginTop='6px'; p.textContent = it.summary;
           right.appendChild(p);
         }
-        right.prepend(meta); right.prepend(a); right.appendChild(tags);
         div.appendChild(img); div.appendChild(right);
         list.appendChild(div);
       }
