@@ -1,5 +1,72 @@
 {
-  "generatedAt": "2025-08-13T20:10:36.442Z",
-  "count": 0,
-  "items": []
+  "updated_at": "2025-08-13T16:30:00.000Z",
+  "count": 6,
+  "items": [
+    {
+      "id": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "title": "Whiskey Tribe — How to Nose Whisky Like a Pro",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "source": "Whiskey Tribe",
+      "type": "video",
+      "region": "us",
+      "published_at": "2025-08-10T14:00:00.000Z",
+      "image": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+      "summary": "Técnicas prácticas para identificar aromas clave en whisky y mejorar tus catas."
+    },
+    {
+      "id": "https://www.youtube.com/watch?v=9bZkp7q19f0",
+      "title": "Ralfy — Summer Whisky Recommendations",
+      "url": "https://www.youtube.com/watch?v=9bZkp7q19f0",
+      "source": "ralfy",
+      "type": "video",
+      "region": "global",
+      "published_at": "2025-08-08T18:30:00.000Z",
+      "image": "https://i.ytimg.com/vi/9bZkp7q19f0/hqdefault.jpg",
+      "summary": "Selección de whiskies para verano: notas, precios y maridajes sugeridos."
+    },
+    {
+      "id": "https://whiskycast.libsyn.com/new-cask-policy-explained",
+      "title": "WhiskyCast — New Cask Policy Explained",
+      "url": "https://whiskycast.libsyn.com/new-cask-policy-explained",
+      "source": "WhiskyCast (Podcast)",
+      "type": "podcast",
+      "region": "global",
+      "published_at": "2025-08-11T09:00:00.000Z",
+      "image": null,
+      "summary": "Impacto de las nuevas regulaciones de barrica en sabor, precio y disponibilidad."
+    },
+    {
+      "id": "https://bourbonpursuit.libsyn.com/episode-999-rare-bourbon-release-calendar",
+      "title": "Bourbon Pursuit — Rare Bourbon Release Calendar",
+      "url": "https://bourbonpursuit.libsyn.com/episode-999-rare-bourbon-release-calendar",
+      "source": "Bourbon Pursuit (Podcast)",
+      "type": "podcast",
+      "region": "us",
+      "published_at": "2025-08-09T12:15:00.000Z",
+      "image": null,
+      "summary": "Calendario de lanzamientos escasos y cómo conseguirlos sin pagar sobreprecio."
+    },
+    {
+      "id": "https://thewhiskeywash.com/whiskey-styles/scotch/new-islay-release-2025",
+      "title": "The Whiskey Wash — New Islay Release 2025",
+      "url": "https://thewhiskeywash.com/whiskey-styles/scotch/new-islay-release-2025",
+      "source": "The Whiskey Wash",
+      "type": "article",
+      "region": "global",
+      "published_at": "2025-08-12T07:45:00.000Z",
+      "image": "https://images.example.com/islay_release.jpg",
+      "summary": "Nueva edición de Islay con notas de turba suave, cítricos y vainilla."
+    },
+    {
+      "id": "https://whiskynotes.be/2025/new-highland-bottlings",
+      "title": "WhiskyNotes — New Highland Bottlings",
+      "url": "https://whiskynotes.be/2025/new-highland-bottlings",
+      "source": "WhiskyNotes",
+      "type": "article",
+      "region": "global",
+      "published_at": "2025-08-07T10:20:00.000Z",
+      "image": "https://images.example.com/highland_bottlings.jpg",
+      "summary": "Catamos embotellados de Highlands: miel, frutas de hueso y especias."
+    }
+  ]
 }
