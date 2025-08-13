@@ -1,183 +1,61 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Whiskaner News</title>
-<style>
-  :root { --bg:#0f1115; --card:#171a21; --muted:#99a1b3; --text:#e6e9f2; --brand:#ffd166; --chip:#232734; }
-  * { box-sizing: border-box; }
-  html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
-  header { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
-  .logo { width:36px; height:36px; background:linear-gradient(180deg, #2b2f3b, #141823); border-radius:10px; display:grid; place-items:center; color:#f3c969; font-weight:800; }
-  h1 { font-size:20px; margin:0; }
-  .subtitle { font-size:12px; color:var(--muted); margin-top:2px; }
-  .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:16px 0; }
-  .tabs { display:flex; gap:8px; }
-  .tab { background:var(--chip); color:#cfd6ea; border:1px solid #2d3345; padding:6px 12px; border-radius:999px; font-size:13px; cursor:pointer; }
-  .tab.active { background:var(--brand); color:#111; border-color:#00000000; }
-  .spacer { flex:1; }
-  .search { position:relative; }
-  .search input { background:#0f131b; border:1px solid #2d3345; color:var(--text); padding:8px 12px; border-radius:10px; min-width:280px; }
-  .chip { background:var(--chip); border:1px solid #2d3345; padding:6px 10px; border-radius:10px; font-size:12px; color:#ccd3e6; display:flex; align-items:center; gap:8px; }
-  .chip input { accent-color:var(--brand); }
-  .meta { display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted); margin:8px 0 12px; }
-  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px; }
-  .card { background:var(--card); border:1px solid #222638; border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:10px; }
-  .thumb { width:100%; height:150px; background:#10141c; border-radius:12px; object-fit:cover; }
-  .kicker { display:flex; gap:6px; }
-  .pill { font-size:11px; padding:4px 8px; border-radius:999px; background:#22283a; color:#cbd2e7; border:1px solid #2f3651; }
-  .title { font-weight:700; line-height:1.2; }
-  .desc { font-size:13px; color:#c5cce0; }
-  .cta { margin-top:auto; display:flex; justify-content:flex-end; }
-  .btn { background:var(--brand); color:#111; border:0; padding:8px 12px; border-radius:10px; font-weight:700; cursor:pointer; text-decoration:none; }
-  .empty { padding:60px 12px; text-align:center; color:#c7cee2; border:1px dashed #2c3347; border-radius:16px; background:#121622; }
-  a { color:#ffd166; }
-  @media (max-width: 560px) { .search input { min-width:180px; } }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Whiskaner News</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { text-align: center; }
+    .item { border-bottom: 1px solid #ccc; padding: 10px 0; }
+    .video iframe { width: 100%; max-width: 560px; height: 315px; }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="logo">W</div>
-      <div>
-        <h1>Whiskaner News</h1>
-        <div class="subtitle">Curación automática de whisky — artículos, videos y podcasts</div>
-      </div>
-    </header>
+  <h1>Whiskaner News</h1>
+  <div id="feed"></div>
 
-    <div class="toolbar">
-      <div class="tabs">
-        <button class="tab active" data-tab="all">Todo</button>
-        <button class="tab" data-tab="article">Artículos</button>
-        <button class="tab" data-tab="video">Videos</button>
-        <button class="tab" data-tab="podcast">Podcasts</button>
-      </div>
-      <div class="spacer"></div>
-      <div class="search"><input id="q" type="search" placeholder="Buscar título o fuente…" /></div>
-      <label class="chip"><input id="breaking" type="checkbox" /> Breaking (48h)</label>
-    </div>
+  <script>
+    async function loadFeed() {
+      try {
+        const res = await fetch('./feed.json');
+        const items = await res.json();
 
-    <div class="meta">
-      <div id="count">Mostrando 0 de 0 entradas</div>
-      <div id="updated">Última actualización: s/f</div>
-    </div>
+        const container = document.getElementById('feed');
+        container.innerHTML = '';
 
-    <div id="list" class="grid"></div>
-    <div id="empty" class="empty" style="display:none">Sin resultados con los filtros actuales.</div>
-    <div class="meta" style="margin-top:24px">
-      <span></span>
-      <div>Fuente JSON: <a href="./feed.json">feed.json</a></div>
-    </div>
-  </div>
+        items.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'item';
 
-<script>
-(async function () {
-  const TABS = Array.from(document.querySelectorAll(".tab"));
-  const Q = document.getElementById("q");
-  const BREAKING = document.getElementById("breaking");
-  const LIST = document.getElementById("list");
-  const EMPTY = document.getElementById("empty");
-  const COUNT = document.getElementById("count");
-  const UPDATED = document.getElementById("updated");
+          if (item.type === 'video') {
+            div.classList.add('video');
+            div.innerHTML = `
+              <h3>${item.title}</h3>
+              <iframe src="https://www.youtube.com/embed/${item.videoId}" frameborder="0" allowfullscreen></iframe>
+              <p>${item.description || ''}</p>
+            `;
+          } else if (item.type === 'podcast') {
+            div.innerHTML = `
+              <h3>${item.title}</h3>
+              <audio controls src="${item.audioUrl}"></audio>
+              <p>${item.description || ''}</p>
+            `;
+          } else {
+            div.innerHTML = `
+              <h3><a href="${item.url}" target="_blank">${item.title}</a></h3>
+              <p>${item.description || ''}</p>
+            `;
+          }
 
-  // -------- carga robusta de feed.json --------
-  let raw;
-  try {
-    const res = await fetch("./feed.json", { cache: "no-store" });
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    raw = await res.json();
-  } catch (e) {
-    console.warn("No se pudo leer feed.json:", e);
-    raw = { items: [] };
-  }
-
-  // acepta formato nuevo {items:[]} o antiguo []
-  const items = Array.isArray(raw) ? raw : (Array.isArray(raw.items) ? raw.items : []);
-  const generatedAt = raw.generatedAt || (items[0]?.date ?? null);
-
-  // normaliza mínimos
-  const norm = items.map(x => ({
-    id: x.id || x.guid || x.url || x.link || x.title || Math.random().toString(36).slice(2),
-    type: (x.type || "").toLowerCase(),            // 'article' | 'video' | 'podcast'
-    source: x.source || "",
-    title: (x.title || "").toString(),
-    url: x.url || x.link || "",
-    date: x.date ? new Date(x.date) : new Date(0),
-    description: (x.description || "").toString(),
-    image: x.image || null,
-  })).sort((a,b) => b.date - a.date);
-
-  // estado UI
-  let state = { tab: "all", q: "", breaking: false };
-
-  function fmtDate(d) {
-    if (!(d instanceof Date) || isNaN(d)) return "s/f";
-    return d.toLocaleString(undefined, { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-  }
-
-  function apply() {
-    const now = Date.now();
-    const q = state.q.trim().toLowerCase();
-
-    let filtered = norm.filter(it => {
-      const okTab = state.tab === "all" ? true : it.type === state.tab;
-      const okQ = !q || (it.title.toLowerCase().includes(q) || (it.source||"").toLowerCase().includes(q));
-      const okBreaking = !state.breaking || ((now - it.date.getTime()) <= 48 * 3600 * 1000);
-      return okTab && okQ && okBreaking;
-    });
-
-    // pintar
-    LIST.innerHTML = "";
-    if (filtered.length === 0) {
-      EMPTY.style.display = "block";
-    } else {
-      EMPTY.style.display = "none";
-      for (const it of filtered) {
-        const card = document.createElement("div");
-        card.className = "card";
-        if (it.image) {
-          const img = document.createElement("img");
-          img.className = "thumb";
-          img.loading = "lazy";
-          img.src = it.image;
-          img.alt = "";
-          card.appendChild(img);
-        }
-        const chips = document.createElement("div");
-        chips.className = "kicker";
-        const p1 = document.createElement("span"); p1.className = "pill"; p1.textContent = it.type.toUpperCase();
-        const p2 = document.createElement("span"); p2.className = "pill"; p2.textContent = it.source || "GLOBAL";
-        const p3 = document.createElement("span"); p3.className = "pill"; p3.textContent = it.date.toLocaleString();
-        chips.append(p1, p2, p3);
-        const h3 = document.createElement("div"); h3.className = "title"; h3.textContent = it.title || "(sin título)";
-        const d = document.createElement("div"); d.className = "desc"; d.textContent = it.description ? (it.description.replace(/\s+/g," ").slice(0,280)+"…") : "";
-        const cta = document.createElement("div"); cta.className = "cta";
-        const a = document.createElement("a"); a.className="btn"; a.href = it.url || "#"; a.target="_blank"; a.rel="noopener"; a.textContent = "Abrir →";
-        cta.appendChild(a);
-        card.append(chips, h3, d, cta);
-        LIST.appendChild(card);
+          container.appendChild(div);
+        });
+      } catch (err) {
+        console.error('Error cargando feed.json:', err);
       }
     }
 
-    COUNT.textContent = `Mostrando ${filtered.length} de ${norm.length} entradas`;
-    UPDATED.textContent = `Última actualización: ${generatedAt ? fmtDate(new Date(generatedAt)) : (filtered[0] ? fmtDate(filtered[0].date) : "s/f")}`;
-  }
-
-  // eventos
-  TABS.forEach(btn => btn.addEventListener("click", () => {
-    TABS.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    state.tab = btn.dataset.tab;
-    apply();
-  }));
-  Q.addEventListener("input", () => { state.q = Q.value; apply(); });
-  BREAKING.addEventListener("change", () => { state.breaking = BREAKING.checked; apply(); });
-
-  // kick-off
-  apply();
-})();
-</script>
+    loadFeed();
+  </script>
 </body>
 </html>
