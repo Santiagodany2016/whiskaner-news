@@ -1,31 +1,37 @@
 name: Build & Publish Whisky Feed
 
 on:
-  schedule:
-    - cron: "0 * * * *"   # cada hora
   workflow_dispatch:
-  push:
-    branches: [ main ]
-    paths:
-      - "sources.yaml"
-      - "scripts/**"
-      - "package.json"
-      - ".github/workflows/build.yml"
+  schedule:
+    - cron: "0 */2 * * *"  # cada 2 horas
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - run: npm ci || npm i
-      - run: npm run build
+          node-version: "20"
+
+      - name: Install deps
+        run: npm ci || npm i
+
+      - name: Build
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}   # <-- usa tu secret
+        run: npm run build
+
       - name: Commit feed.json
-        uses: EndBug/add-and-commit@v9
-        with:
-          add: "docs/feed.json"
-          message: "chore: update feed.json [skip ci]"
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/feed.json
+          git commit -m "chore: update feed.json [skip ci]" || echo "Sin cambios"
+          git push
