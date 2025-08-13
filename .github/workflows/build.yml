@@ -3,39 +3,58 @@ name: Build & Publish Whisky Feed
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */2 * * *"
+    - cron: "0 */2 * * *"  # cada 2 horas
+
+permissions:
+  contents: write
+
+# Evita carreras: si lanzas otro build, cancela el anterior
+concurrency:
+  group: whisky-news-feed
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout (full history)
         uses: actions/checkout@v4
         with:
-          ref: main
-          fetch-depth: 0
+          fetch-depth: 0           # necesario para rebase/push
 
-      - name: Setup Node
+      - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
 
-      - name: Install
-        run: npm ci
+      - name: Install deps
+        run: npm ci || npm i
 
-      - name: Build feed
+      - name: Build feed.json
         env:
-          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}   # tu secreto
         run: npm run build
 
-      # Si el script salió con 1 por feed vacío, este paso no corre (success() requerido)
-      - name: Commit & Publish feed
-        if: success()
+      # ----- Solución al error "non-fast-forward" -----
+      - name: Configure git user
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add feed.json
+        run: |
           git add docs/feed.json
-          git commit -m "chore: update feed.json [skip ci]" || echo "No changes"
-          git pull --rebase
-          git push
+          git status --porcelain
+
+      - name: Commit (skip if no changes)
+        run: |
+          git commit -m "chore: update feed.json [skip ci]" || echo "Sin cambios"
+
+      - name: Rebase with remote main (avoid non-fast-forward)
+        run: |
+          git fetch origin main
+          git pull --rebase origin main || true
+
+      - name: Push
+        run: |
+          git push origin HEAD:main
