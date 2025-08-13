@@ -8,21 +8,14 @@ on:
 permissions:
   contents: write
 
-# Evita carreras: si lanzas otro build, cancela el anterior
-concurrency:
-  group: whisky-news-feed
-  cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (full history)
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0           # necesario para rebase/push
 
-      - name: Setup Node 20
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -30,31 +23,15 @@ jobs:
       - name: Install deps
         run: npm ci || npm i
 
-      - name: Build feed.json
+      - name: Build
         env:
-          YT_API_KEY: ${{ secrets.YT_API_KEY }}   # tu secreto
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}   # <-- usa tu secret
         run: npm run build
 
-      # ----- Solución al error "non-fast-forward" -----
-      - name: Configure git user
+      - name: Commit feed.json
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Add feed.json
-        run: |
           git add docs/feed.json
-          git status --porcelain
-
-      - name: Commit (skip if no changes)
-        run: |
           git commit -m "chore: update feed.json [skip ci]" || echo "Sin cambios"
-
-      - name: Rebase with remote main (avoid non-fast-forward)
-        run: |
-          git fetch origin main
-          git pull --rebase origin main || true
-
-      - name: Push
-        run: |
-          git push origin HEAD:main
+          git push
