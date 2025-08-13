@@ -3,9 +3,19 @@
 # region: global | us | uk | jp | ...
 
 sources:
-  # --- Artículos / Revistas / Blogs (estables) ---
+  # --- Artículos / Revistas / Blogs ---
+  - name: "Whisky Advocate (revista)"
+    url: "https://whiskyadvocate.com/feed/"
+    type: "article"
+    region: "us"
+
   - name: "The Whiskey Wash"
     url: "https://thewhiskeywash.com/feed/"
+    type: "article"
+    region: "global"
+
+  - name: "Whiskyfun"
+    url: "https://whiskyfun.com/whatsnew.xml"
     type: "article"
     region: "global"
 
@@ -29,19 +39,55 @@ sources:
     type: "article"
     region: "us"
 
-  - name: "Whiskyfun"
-    url: "https://whiskyfun.com/whatsnew.xml"
+  - name: "Dramface"
+    url: "https://www.dramface.com/rss"
+    type: "article"
+    region: "uk"
+
+  - name: "Ralfy's Whisky News"
+    url: "https://ralfywhisky.webnode.be/rss/news-.xml"
     type: "article"
     region: "global"
 
-  - name: "Reddit r/Scotch"
-    url: "https://www.reddit.com/r/Scotch/.rss"
-    type: "article"
+  # --- YouTube (video) ---
+  - name: "Scotch Test Dummies (YouTube)"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCfXfVnEk3Jt3WezbeuvtqYA"
+    type: "video"
     region: "global"
 
-  # --- Podcasts (RSS estables) ---
+  - name: "Ralfy (YouTube)"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCUZqjVQzjY4T1L1R3xj6H9w"
+    type: "video"
+    region: "global"
+
+  - name: "Whiskey Tribe (YouTube)"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCmO7yXzBS7o2R1q8tTq8YVw"
+    type: "video"
+    region: "us"
+
+  - name: "Aqvavitae (YouTube)"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCfsHShbA_RxvBCkntt18fdQ"
+    type: "video"
+    region: "uk"
+
+  - name: "Scotch 4 Dummies (YouTube)"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UChf_GXg_lgQO4OyR6l5S28g"
+    type: "video"
+    region: "us"
+
+  # --- Podcasts (RSS públicos) ---
   - name: "WhiskyCast (Podcast)"
     url: "https://whiskycast.libsyn.com/rss"
+    type: "podcast"
+    region: "global"
+
+  - name: "The Whisky Topic (Podcast)"
+    url: "https://feeds.sounder.fm/20384/rss.xml"
+    type: "podcast"
+    region: "global"
+
+  - name: "One Nation Under Whisky (Podcast)"
+    url: "https://onenationunderwhisky.libsyn.com/rss"
     type: "podcast"
     region: "global"
 
@@ -50,12 +96,7 @@ sources:
     type: "podcast"
     region: "us"
 
-  - name: "This Week in Bourbon (Podcast)"
-    url: "https://thisweekinbourbon.libsyn.com/rss"
-    type: "podcast"
-    region: "us"
-
-  - name: "SMWS – Whisky Talk (Podcast)"
-    url: "https://feeds.buzzsprout.com/650835.rss"
+  - name: "Whisky Unscripted (Podcast)"
+    url: "https://anchor.fm/s/2f34c7cc/podcast/rss"
     type: "podcast"
     region: "uk"
