@@ -1,64 +1,53 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Whisky News (demo)</title>
+  <meta charset="UTF-8">
+  <title>Whiskaner News</title>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; background:#111; color:#eee; }
-    a { color:#ffd369; text-decoration:none; }
-    a:hover { text-decoration:underline; }
-    .item { padding: 12px 0; border-bottom: 1px solid #333; display:flex; gap:12px; }
-    .img { width: 120px; height: 80px; background:#222; flex: 0 0 120px; display:flex; align-items:center; justify-content:center; font-size:12px; color:#666 }
-    .meta { font-size: 12px; color:#aaa }
-    .badge { font-size: 11px; border:1px solid #444; padding:2px 6px; border-radius:999px; margin-left:6px; color:#ccc }
-    header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 1rem; }
-    header small { color:#aaa }
+    body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 1rem; }
+    h2 { border-bottom: 2px solid #ccc; margin-top: 2rem; }
+    article { margin-bottom: 1rem; }
+    a { color: #007bff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Whisky News</h1>
-    <small id="meta"></small>
-  </header>
-  <div id="list"></div>
+  <h1>Whiskaner News</h1>
+  <div id="news"></div>
 
   <script>
-    async function load() {
-      const res = await fetch('./feed.json', { cache: 'no-store' });
-      const data = await res.json();
-      document.getElementById('meta').textContent = `Actualizado: ${new Date(data.updated_at).toLocaleString()}`;
-      const list = document.getElementById('list');
-      for (const it of data.items) {
-        const div = document.createElement('div');
-        div.className = 'item';
-        const img = document.createElement('div');
-        img.className = 'img';
-        if (it.image) {
-          const imgtag = document.createElement('img');
-          imgtag.src = it.image; imgtag.width=120; imgtag.height=80; imgtag.loading="lazy";
-          img.innerHTML = ''; img.appendChild(imgtag);
-        } else {
-          img.textContent = 'sin imagen';
+    const url = 'https://santiagodany2016.github.io/whiskaner-news/feed.json?t=' + Date.now();
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        const grouped = {};
+        data.items.forEach(item => {
+          if (!grouped[item.type]) grouped[item.type] = [];
+          grouped[item.type].push(item);
+        });
+
+        const container = document.getElementById('news');
+        for (const type in grouped) {
+          const h2 = document.createElement('h2');
+          h2.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+          container.appendChild(h2);
+
+          grouped[type].forEach(n => {
+            const art = document.createElement('article');
+            art.innerHTML = `
+              <a href="${n.url}" target="_blank"><strong>${n.title}</strong></a>
+              <p>${n.summary || ''}</p>
+              <small>${n.published_at ? new Date(n.published_at).toLocaleDateString() : ''}</small>
+            `;
+            container.appendChild(art);
+          });
         }
-        const right = document.createElement('div');
-        const a = document.createElement('a'); a.href = it.url; a.target = '_blank'; a.rel='noopener';
-        a.textContent = it.title;
-        const meta = document.createElement('div'); meta.className = 'meta';
-        const date = it.published_at ? new Date(it.published_at).toLocaleString() : 'sin fecha';
-        meta.textContent = `${it.source} • ${date}`;
-        const tags = document.createElement('div'); tags.className = 'meta';
-        tags.innerHTML = `<span class="badge">${it.type}</span><span class="badge">${it.region}</span>`;
-        right.prepend(meta); right.prepend(a); right.appendChild(tags);
-        if (it.summary) {
-          const p = document.createElement('div'); p.className = 'meta'; p.style.marginTop='6px'; p.textContent = it.summary;
-          right.appendChild(p);
-        }
-        div.appendChild(img); div.appendChild(right);
-        list.appendChild(div);
-      }
-    }
-    load();
+      })
+      .catch(err => {
+        document.getElementById('news').textContent = 'Error al cargar las noticias.';
+        console.error(err);
+      });
   </script>
 </body>
 </html>
