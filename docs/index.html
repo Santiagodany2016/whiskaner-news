@@ -1,61 +1,224 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Whiskaner News</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Whiskaner News — Últimas de Whisky</title>
+  <meta name="description" content="Curación automática de noticias, videos y podcasts sobre whisky. Artículos, reseñas, lanzamientos y tendencias.">
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1 { text-align: center; }
-    .item { border-bottom: 1px solid #ccc; padding: 10px 0; }
-    .video iframe { width: 100%; max-width: 560px; height: 315px; }
+    :root{
+      --bg:#0b0b0c; --panel:#111215; --soft:#181a1f; --muted:#a6adbb;
+      --text:#e7e9ee; --brand:#ffd369; --accent:#59d; --danger:#ff5c7a; --ok:#48d597;
+      --border:#24262d; --chip:#1d2027;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:linear-gradient(180deg, #0b0b0c 0%, #0e1014 100%);
+      color:var(--text); font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+    }
+    .wrap{max-width:1100px; margin:0 auto; padding:24px}
+    header.top{
+      position:sticky; top:0; z-index:50; backdrop-filter:saturate(1.1) blur(8px);
+      background:rgba(11,11,12,.75); border-bottom:1px solid var(--border);
+    }
+    header .inner{display:flex; gap:16px; align-items:center; justify-content:space-between; padding:14px 24px;}
+    .brand{display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--text)}
+    .brand .logo{
+      width:36px; height:36px; border-radius:10px; background:radial-gradient(120% 120% at 10% 10%, var(--brand) 0%, #b58b1f 45%, #4a3a0f 100%);
+      box-shadow:0 0 0 1px rgba(255,211,105,.25), 0 8px 24px rgba(255,211,105,.15);
+      display:grid; place-items:center; font-weight:800; color:#000;
+    }
+    .brand h1{font-size:18px; margin:0}
+    .brand small{display:block; color:var(--muted); font-weight:500}
+    .controls{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;}
+    .control{background:var(--panel); border:1px solid var(--border); color:var(--text); padding:8px 10px; border-radius:12px; display:flex; align-items:center; gap:8px;}
+    .control input, .control select{background:transparent; border:0; color:var(--text); outline:none}
+    .btn{cursor:pointer; user-select:none; transition:.2s transform ease}
+    .btn:hover{transform:translateY(-1px)}
+    .refresh{padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:var(--soft)}
+    .stats{color:var(--muted); font-size:12px; padding:0 24px 10px}
+    .tabs{display:flex; gap:8px; padding:14px 24px; border-bottom:1px solid var(--border); background:var(--soft)}
+    .tab{padding:8px 14px; border-radius:999px; border:1px solid var(--border); background:var(--chip); color:#cfd3dc; cursor:pointer}
+    .tab.active{background:var(--brand); color:#1a1400; border-color:rgba(0,0,0,.1); font-weight:700}
+    .grid{display:grid; grid-template-columns:repeat(12,1fr); gap:14px; padding:24px}
+    @media (max-width: 900px){ .grid{grid-template-columns:repeat(6,1fr);} }
+    @media (max-width: 560px){ .grid{grid-template-columns:repeat(1,1fr);} }
+    .card{
+      grid-column:span 4; background:var(--panel); border:1px solid var(--border); border-radius:16px;
+      overflow:hidden; display:flex; flex-direction:column; min-height:180px;
+      transition:transform .2s ease, box-shadow .2s ease;
+    }
+    .card:hover{transform:translateY(-2px); box-shadow:0 12px 30px rgba(0,0,0,.35)}
+    .media{height:160px; background:#0f1116; display:grid; place-items:center; color:#5b6170; font-size:12px}
+    .media img{width:100%; height:100%; object-fit:cover}
+    .body{padding:14px}
+    .title{font-size:16px; font-weight:700; margin:0 0 6px}
+    .meta{display:flex; gap:8px; align-items:center; color:var(--muted); font-size:12px; margin:6px 0 8px}
+    .chip{padding:2px 8px; border-radius:999px; background:var(--chip); border:1px solid var(--border); font-weight:600}
+    .desc{color:#cbd1de; font-size:13px; margin:0 0 10px}
+    .actions{display:flex; justify-content:space-between; align-items:center; gap:8px}
+    .source{color:var(--muted); font-size:12px}
+    .link{padding:8px 10px; border-radius:10px; background:var(--brand); color:#1a1400; font-weight:800; text-decoration:none}
+    .skeleton{animation:pulse 1.2s infinite ease-in-out; background:#13151b; border:1px solid var(--border); border-radius:16px; height:240px}
+    @keyframes pulse {0%{opacity:.6}50%{opacity:1}100%{opacity:.6}}
+    footer{padding:20px 24px; color:var(--muted); border-top:1px solid var(--border); background:var(--panel)}
+    .footwrap{max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px}
+    .footwrap a{color:var(--brand); text-decoration:none}
   </style>
 </head>
 <body>
-  <h1>Whiskaner News</h1>
-  <div id="feed"></div>
+  <header class="top">
+    <div class="inner">
+      <a class="brand" href="#">
+        <div class="logo">W</div>
+        <div>
+          <h1>Whiskaner News</h1>
+          <small>Curación automática de whisky — artículos, videos y podcasts</small>
+        </div>
+      </a>
+      <div class="controls">
+        <label class="control">🔎 <input id="q" type="search" placeholder="Buscar título o fuente…" /></label>
+        <label class="control">🌍
+          <select id="region">
+            <option value="all">Todas las regiones</option>
+            <option value="us">USA</option><option value="uk">UK</option>
+            <option value="eu">EU</option><option value="jp">JP</option>
+            <option value="global">Global</option>
+          </select>
+        </label>
+        <label class="control">🧨 <input id="breaking" type="checkbox" /> <span>Breaking (48h)</span></label>
+        <button class="refresh btn">↻ Actualizar</button>
+      </div>
+    </div>
+    <div class="stats" id="stats">Cargando…</div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-type="all">Todo</button>
+      <button class="tab" data-type="article">Artículos</button>
+      <button class="tab" data-type="video">Videos</button>
+      <button class="tab" data-type="podcast">Podcasts</button>
+    </nav>
+  </header>
+
+  <main class="wrap"><section class="grid" id="grid"></section></main>
+
+  <footer>
+    <div class="footwrap">
+      <div>Última actualización: <span id="updated">—</span></div>
+      <div>Fuente JSON: <a id="jsonlink" href="#" target="_blank" rel="noopener">feed.json</a></div>
+    </div>
+  </footer>
 
   <script>
-    async function loadFeed() {
-      try {
-        const res = await fetch('./feed.json');
-        const items = await res.json();
+    const FEED_URL = 'feed.json?t=' + Date.now(); // relativo a /docs
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const fmtDate = (iso) => iso ? new Date(iso).toLocaleString() : 's/f';
+    const withinHours = (iso, hrs) => iso ? (Date.now() - Date.parse(iso)) < (hrs*3600*1000) : false;
 
-        const container = document.getElementById('feed');
-        container.innerHTML = '';
+    let DATA = { items: [], updated_at: null };
+    let state = { type: 'all', region: 'all', q: '', breaking: false };
 
-        items.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'item';
+    const grid = $('#grid'), stats = $('#stats'), updated = $('#updated'), jsonlink = $('#jsonlink');
 
-          if (item.type === 'video') {
-            div.classList.add('video');
-            div.innerHTML = `
-              <h3>${item.title}</h3>
-              <iframe src="https://www.youtube.com/embed/${item.videoId}" frameborder="0" allowfullscreen></iframe>
-              <p>${item.description || ''}</p>
-            `;
-          } else if (item.type === 'podcast') {
-            div.innerHTML = `
-              <h3>${item.title}</h3>
-              <audio controls src="${item.audioUrl}"></audio>
-              <p>${item.description || ''}</p>
-            `;
-          } else {
-            div.innerHTML = `
-              <h3><a href="${item.url}" target="_blank">${item.title}</a></h3>
-              <p>${item.description || ''}</p>
-            `;
-          }
-
-          container.appendChild(div);
-        });
-      } catch (err) {
-        console.error('Error cargando feed.json:', err);
+    function showSkeleton(n=9){
+      grid.innerHTML = '';
+      for (let i=0;i<n;i++){
+        const div = document.createElement('div');
+        div.className = 'skeleton'; div.style.gridColumn = 'span 4';
+        grid.appendChild(div);
       }
     }
 
-    loadFeed();
+    async function load() {
+      showSkeleton();
+      try{
+        const res = await fetch(FEED_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        DATA = data;
+        render();
+      }catch(e){
+        // UI visible aunque falle el feed
+        grid.innerHTML = '<div style="grid-column:1/-1; padding:24px; background:#1a1c22; border:1px solid #2a2d36; border-radius:12px;">'
+          + '<div style="font-size:18px; color:#ffb3c0;">⚠️ Error cargando noticias</div>'
+          + '<div style="color:#a6adbb;">Revisa que <code>docs/feed.json</code> exista. Mensaje: '+(e?.message||e)+'</div>'
+          + '</div>';
+        updated.textContent = '—';
+        jsonlink.href = 'feed.json';
+        stats.textContent = '—';
+      }
+    }
+
+    function render(){
+      const items = DATA.items.filter(it => {
+        if (state.type !== 'all' && it.type !== state.type) return false;
+        if (state.region !== 'all' && (it.region || 'global') !== state.region) return false;
+        if (state.breaking && !withinHours(it.published_at, 48)) return false;
+        if (state.q){
+          const q = state.q.toLowerCase();
+          const hay = (it.title||'').toLowerCase().includes(q)
+               || (it.source||'').toLowerCase().includes(q)
+               || (it.summary||'').toLowerCase().includes(q);
+          if (!hay) return false;
+        }
+        return true;
+      });
+
+      updated.textContent = fmtDate(DATA.updated_at);
+      jsonlink.href = 'feed.json';
+      stats.textContent = `Mostrando ${items.length.toLocaleString()} de ${(DATA.count ?? DATA.items.length).toLocaleString()} entradas`;
+
+      grid.innerHTML = '';
+      if (!items.length){
+        grid.innerHTML = '<div style="grid-column:1/-1; padding:24px; color:#a6adbb;">Sin resultados con los filtros actuales.</div>';
+        return;
+      }
+
+      for (const it of items){
+        const card = document.createElement('article');
+        card.className = 'card';
+
+        const media = document.createElement('div');
+        media.className = 'media';
+        if (it.image){ const img = new Image(); img.src = it.image; img.alt = it.title; img.loading = 'lazy'; media.appendChild(img); }
+        else { media.textContent = 'sin imagen'; }
+        card.appendChild(media);
+
+        const body = document.createElement('div'); body.className = 'body';
+        const h3 = document.createElement('h3'); h3.className = 'title';
+        const a = document.createElement('a'); a.href = it.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = it.title || '(sin título)';
+        a.style.color = 'inherit'; a.style.textDecoration = 'none'; h3.appendChild(a);
+
+        const meta = document.createElement('div'); meta.className = 'meta';
+        const chipType = document.createElement('span'); chipType.className = 'chip'; chipType.textContent = (it.type||'').toUpperCase();
+        const chipRegion = document.createElement('span'); chipRegion.className = 'chip'; chipRegion.textContent = (it.region||'global').toUpperCase();
+        const date = document.createElement('span'); date.textContent = '• ' + fmtDate(it.published_at);
+        meta.append(chipType, chipRegion, date);
+
+        const desc = document.createElement('p'); desc.className = 'desc'; desc.textContent = it.summary || '';
+
+        const actions = document.createElement('div'); actions.className = 'actions';
+        const src = document.createElement('div'); src.className = 'source'; src.textContent = it.source || '';
+        const link = document.createElement('a'); link.className = 'link'; link.href = it.url; link.target = '_blank'; link.rel = 'noopener'; link.textContent = 'Abrir ►';
+        actions.append(src, link);
+
+        body.append(h3, meta, desc, actions);
+        card.appendChild(body);
+        grid.appendChild(card);
+      }
+    }
+
+    $('#q').addEventListener('input', e => { state.q = e.target.value.trim(); render(); });
+    $('#region').addEventListener('change', e => { state.region = e.target.value; render(); });
+    $('#breaking').addEventListener('change', e => { state.breaking = e.target.checked; render(); });
+    $$('.tab').forEach(t => t.addEventListener('click', () => {
+      $$('.tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active'); state.type = t.dataset.type; render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+    }));
+    $('.refresh').addEventListener('click', () => load());
+    setInterval(load, 5*60*1000);
+    load();
   </script>
 </body>
 </html>
