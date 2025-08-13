@@ -3,58 +3,39 @@ name: Build & Publish Whisky Feed
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */2 * * *"  # cada 2 horas
-
-permissions:
-  contents: write
-
-# Evita carreras: si lanzas otro build, cancela el anterior
-concurrency:
-  group: whisky-news-feed
-  cancel-in-progress: true
+    - cron: "0 */2 * * *"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (full history)
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0           # necesario para rebase/push
+          ref: main
+          fetch-depth: 0
 
-      - name: Setup Node 20
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "npm"
 
-      - name: Install deps
-        run: npm ci || npm i
+      - name: Install
+        run: npm ci
 
-      - name: Build feed.json
+      - name: Build feed
         env:
-          YT_API_KEY: ${{ secrets.YT_API_KEY }}   # tu secreto
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
         run: npm run build
 
-      # ----- Solución al error "non-fast-forward" -----
-      - name: Configure git user
+      # Si el script salió con 1 por feed vacío, este paso no corre (success() requerido)
+      - name: Commit & Publish feed
+        if: success()
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Add feed.json
-        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/feed.json
-          git status --porcelain
-
-      - name: Commit (skip if no changes)
-        run: |
-          git commit -m "chore: update feed.json [skip ci]" || echo "Sin cambios"
-
-      - name: Rebase with remote main (avoid non-fast-forward)
-        run: |
-          git fetch origin main
-          git pull --rebase origin main || true
-
-      - name: Push
-        run: |
-          git push origin HEAD:main
+          git commit -m "chore: update feed.json [skip ci]" || echo "No changes"
+          git pull --rebase
+          git push
