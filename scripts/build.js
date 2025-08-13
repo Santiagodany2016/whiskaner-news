@@ -1,60 +1,41 @@
-/**
- * scripts/build.js  (ESM)
- * ------------------------------------------------------------
- * Genera docs/feed.json unificando Artículos (RSS/Atom),
- * Podcasts (RSS/Atom) y Videos (YouTube Data API v3).
- *
- * Requisitos en package.json:
- *   "type": "module"
- *   deps: yaml, xml2js
- *   Node 20+ (tiene fetch global)
- *
- * Cambios clave:
- *   - MAX_ITEMS = 800
- *   - MIN_VIDEOS = 100 (cuota mínima de videos)
- */
+// scripts/build.js (ESM) — listo para usar
+// Genera docs/feed.json unificando Artículos (RSS/Atom), Podcasts (RSS/Atom) y Videos (YouTube)
 
 import fs from "node:fs/promises";
 import path from "node:path";
 import { parse as parseYAML } from "yaml";
 import { Parser as XMLParser } from "xml2js";
 
-// --- límites del feed ---
-const MAX_ITEMS = 800;      // antes 500
-const MIN_VIDEOS = 100;     // cupo mínimo reservado para videos
+// ----- Configuración -----
+const MAX_ITEMS = 800;   // tamaño del feed
+const MIN_VIDEOS = 100;  // reserva mínima de videos
 
-// --- utilidades de ruta ---
 const ROOT = process.cwd();
 const DOCS_DIR = path.join(ROOT, "docs");
 const FEED_PATH = path.join(DOCS_DIR, "feed.json");
 const SOURCES_YAML = path.join(ROOT, "sources.yaml");
 const YT_CHANNELS_JSON = path.join(ROOT, "youtube_channels.json");
 
-// --- helpers generales ---
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+// ----- Helpers -----
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const byDateDesc = (a, b) => new Date(b.date) - new Date(a.date);
+const keyOf = (x) =>
+  x.id ?? x.guid ?? x.url ?? x.link ?? x.permalink ?? x.title ?? JSON.stringify(x);
 
-// clave única robusta por item
-const keyOf = (x) => x.id ?? x.guid ?? x.url ?? x.link ?? x.permalink ?? x.title ?? JSON.stringify(x);
-
-// fecha segura a ISO
 function toISODate(input) {
-  if (!input) return new Date(0).toISOString();
   try {
     const d = new Date(input);
-    if (Number.isNaN(d.getTime())) return new Date(0).toISOString();
-    return d.toISOString();
+    return Number.isNaN(d.getTime()) ? new Date(0).toISOString() : d.toISOString();
   } catch {
     return new Date(0).toISOString();
   }
 }
 
-// fetch con reintentos
-async function fetchJSON(url, options = {}, retries = 2) {
+async function fetchJSON(url, retries = 2) {
   for (let i = 0; i <= retries; i++) {
     try {
-      const res = await fetch(url, options);
-      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
       if (i === retries) throw err;
@@ -67,7 +48,7 @@ async function fetchText(url, retries = 2) {
   for (let i = 0; i <= retries; i++) {
     try {
       const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.text();
     } catch (err) {
       if (i === retries) throw err;
@@ -76,25 +57,23 @@ async function fetchText(url, retries = 2) {
   }
 }
 
-// parse RSS/Atom
 async function parseFeedXML(xml) {
-  const parser = new XMLParser({ explicitArray: false, mergeAttrs: true, normalizeTags: true });
+  const parser = new XMLParser({
+    explicitArray: false,
+    mergeAttrs: true,
+    normalizeTags: true,
+  });
   return parser.parseStringPromise(xml);
 }
 
-// normalización RSS/Atom (article/podcast)
+// ----- Normalizadores -----
 function normalizeRssItem(raw, type, sourceName) {
   const title = raw.title?.trim?.() || raw["media:title"] || raw["dc:title"] || "";
-  const link =
-    raw.link?.href || // Atom
-    raw.link ||       // RSS
-    raw.guid?.["_"] || raw.guid || "";
-  const date =
-    raw.pubDate || raw.published || raw.updated || raw["dc:date"] || raw["dc:created"] || raw["dc:issued"];
+  const link = raw.link?.href || raw.link || raw.guid?._ || raw.guid || "";
+  const date = raw.pubDate || raw.published || raw.updated || raw["dc:date"] || "";
   const description =
     raw.description || raw.summary || raw["content:encoded"] || raw.content || "";
-
-  let image =
+  const image =
     raw["media:thumbnail"]?.url ||
     raw["media:content"]?.url ||
     (Array.isArray(raw.enclosure) ? raw.enclosure[0]?.url : raw.enclosure?.url) ||
@@ -102,18 +81,18 @@ function normalizeRssItem(raw, type, sourceName) {
 
   return {
     id: raw.guid?._ || raw.guid || link || title,
-    type,                          // 'article' | 'podcast'
+    type, // 'article' | 'podcast'
     source: sourceName || "",
-    title: title?.toString().trim(),
-    url: typeof link === "string" ? link : (link?.href || ""),
+    title: (title || "").toString().trim(),
+    url: typeof link === "string" ? link : link?.href || "",
     date: toISODate(date),
-    description: (typeof description === "string" ? description : "").toString(),
+    description: (description || "").toString(),
     image,
-    region: "GLOBAL"
+    region: "GLOBAL",
   };
 }
 
-// lee sources.yaml
+// ----- Lectores de fuentes -----
 async function readSourcesYaml() {
   const txt = await fs.readFile(SOURCES_YAML, "utf8");
   const y = parseYAML(txt);
@@ -123,7 +102,6 @@ async function readSourcesYaml() {
   };
 }
 
-// consume feed RSS/Atom
 async function pullRssOrAtom({ name, url }, type) {
   try {
     const xml = await fetchText(url);
@@ -131,21 +109,33 @@ async function pullRssOrAtom({ name, url }, type) {
 
     let rawItems = [];
     if (parsed?.rss?.channel?.item) {
-      rawItems = Array.isArray(parsed.rss.channel.item) ? parsed.rss.channel.item : [parsed.rss.channel.item];
+      rawItems = Array.isArray(parsed.rss.channel.item)
+        ? parsed.rss.channel.item
+        : [parsed.rss.channel.item];
     } else if (parsed?.feed?.entry) {
-      rawItems = Array.isArray(parsed.feed.entry) ? parsed.feed.entry : [parsed.feed.entry];
+      rawItems = Array.isArray(parsed.feed.entry)
+        ? parsed.feed.entry
+        : [parsed.feed.entry];
     }
-
-    return rawItems.map(it => normalizeRssItem(it, type, name));
-  } catch (err) {
-    console.warn(`[WARN] RSS/Atom fallo (${type}) ${name}: ${err.message}`);
+    return rawItems.map((it) => normalizeRssItem(it, type, name));
+  } catch {
     return [];
   }
 }
 
-// YouTube: videos recientes por canal (máx 50, últimos 90 días)
+async function readYouTubeChannels() {
+  try {
+    const txt = await fs.readFile(YT_CHANNELS_JSON, "utf8");
+    const arr = JSON.parse(txt);
+    return arr
+      .map((e) => (typeof e === "string" ? e : e?.channelId))
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 async function pullYouTubeChannel(channelId, apiKey) {
-  const collected = [];
   const params = new URLSearchParams({
     key: apiKey,
     channelId,
@@ -153,88 +143,112 @@ async function pullYouTubeChannel(channelId, apiKey) {
     maxResults: "50",
     order: "date",
     type: "video",
-    publishedAfter: new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString()
+    publishedAfter: new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString(),
   });
-
   const url = `https://www.googleapis.com/youtube/v3/search?${params.toString()}`;
   const json = await fetchJSON(url);
 
-  for (const item of json.items || []) {
-    if (item.id?.kind !== "youtube#video") continue;
-    const vId = item.id.videoId;
-    const sn = item.snippet || {};
-    collected.push({
-      id: vId,
-      type: "video",
-      source: sn.channelTitle || "YouTube",
-      title: sn.title || "",
-      url: `https://www.youtube.com/watch?v=${vId}`,
-      date: toISODate(sn.publishedAt),
-      description: sn.description || "",
-      image: sn.thumbnails?.high?.url || sn.thumbnails?.medium?.url || sn.thumbnails?.default?.url || null,
-      region: "GLOBAL"
+  return (json.items || [])
+    .filter((i) => i.id?.kind === "youtube#video")
+    .map((item) => {
+      const vId = item.id.videoId;
+      const sn = item.snippet || {};
+      return {
+        id: vId,
+        type: "video",
+        source: sn.channelTitle || "YouTube",
+        title: sn.title || "",
+        url: `https://www.youtube.com/watch?v=${vId}`,
+        date: toISODate(sn.publishedAt),
+        description: sn.description || "",
+        image: sn.thumbnails?.high?.url || sn.thumbnails?.medium?.url || sn.thumbnails?.default?.url || null,
+        region: "GLOBAL",
+      };
     });
-  }
-
-  return collected;
 }
 
-async function readYouTubeChannels() {
-  try {
-    const txt = await fs.readFile(YT_CHANNELS_JSON, "utf8");
-    const arr = JSON.parse(txt);
-    const ids = [];
-    for (const entry of arr) {
-      if (!entry) continue;
-      if (typeof entry === "string") ids.push(entry);
-      else if (typeof entry.channelId === "string") ids.push(entry.channelId);
-    }
-    return ids;
-  } catch (err) {
-    console.warn(`[WARN] No se pudo leer youtube_channels.json: ${err.message}`);
-    return [];
-  }
-}
-
-// Ensambla todo → feedItems
+// ----- Build del feed -----
 async function buildFeed() {
-  console.log("▶ Iniciando build de feed…");
-
   const { articles, podcasts } = await readSourcesYaml();
-  console.log(`• Fuentes: ${articles.length} artículos, ${podcasts.length} podcasts`);
-
   const YT_API_KEY = process.env.YT_API_KEY || process.env.GOOGLE_API_KEY;
   const ytChannels = await readYouTubeChannels();
 
-  // --- Pull RSS/Atom ---
-  const rssJobs = [
-    ...articles.map(src => pullRssOrAtom(src, "article")),
-    ...podcasts.map(src => pullRssOrAtom(src, "podcast")),
-  ];
-  const rssResults = await Promise.all(rssJobs);
-  const rssItems = rssResults.flat();
+  const rssItems = (
+    await Promise.all([
+      ...articles.map((src) => pullRssOrAtom(src, "article")),
+      ...podcasts.map((src) => pullRssOrAtom(src, "podcast")),
+    ])
+  ).flat();
 
-  // --- Pull YouTube ---
   let ytItems = [];
   if (YT_API_KEY && ytChannels.length) {
-    const ytJobs = ytChannels.map(id =>
-      pullYouTubeChannel(id, YT_API_KEY).catch(err => {
-        console.warn(`[WARN] YouTube canal ${id}: ${err.message}`); return [];
-      })
-    );
-    ytItems = (await Promise.all(ytJobs)).flat();
-  } else {
-    if (!YT_API_KEY) console.warn("[WARN] YT_API_KEY no definido; se omiten videos.");
-    if (!ytChannels.length) console.warn("[WARN] youtube_channels.json vacío; se omiten videos.");
+    ytItems = (
+      await Promise.all(
+        ytChannels.map((id) =>
+          pullYouTubeChannel(id, YT_API_KEY).catch(() => [])
+        )
+      )
+    ).flat();
   }
 
-  // --- Unir, normalizar mínimos y deduplicar ---
-  const allRaw = [...rssItems, ...ytItems];
-
-  const allItems = allRaw.map(x => ({
+  const allItems = [...rssItems, ...ytItems].map((x) => ({
     id: x.id,
-    type: x.type, // 'article'|'podcast'|'video'
+    type: x.type,
     source: x.source || "",
     title: (x.title || "").toString().trim(),
     url: x.url || x.link || "",
-    date: toISODate
+    date: toISODate(x.date),
+    description: (x.description || "").toString(),
+    image: x.image || null,
+    region: x.region || "GLOBAL",
+  }));
+
+  // de-dup
+  const seen = new Set();
+  const deduped = [];
+  for (const it of allItems) {
+    const k = keyOf(it);
+    if (!seen.has(k)) {
+      seen.add(k);
+      deduped.push(it);
+    }
+  }
+
+  // orden global
+  deduped.sort(byDateDesc);
+
+  // reserva videos + recorte
+  const videoItems = deduped.filter((i) => i.type === "video");
+  const otherItems = deduped.filter((i) => i.type !== "video");
+
+  const reservedVideos = videoItems.slice(0, Math.min(MIN_VIDEOS, videoItems.length));
+  const remaining = Math.max(0, MAX_ITEMS - reservedVideos.length);
+
+  const taken = new Set(reservedVideos.map(keyOf));
+  const fillOthers = [];
+  for (const item of otherItems) {
+    const k = keyOf(item);
+    if (taken.has(k)) continue;
+    fillOthers.push(item);
+    if (fillOthers.length >= remaining) break;
+  }
+
+  return [...reservedVideos, ...fillOthers].sort(byDateDesc).slice(0, MAX_ITEMS);
+}
+
+// ----- Escritura -----
+async function writeFeedJson(items) {
+  await fs.mkdir(DOCS_DIR, { recursive: true });
+  const payload = {
+    generatedAt: new Date().toISOString(),
+    count: items.length,
+    items,
+  };
+  await fs.writeFile(FEED_PATH, JSON.stringify(payload, null, 2), "utf8");
+  console.log(`✔ Escrito ${FEED_PATH} con ${items.length} items`);
+}
+
+// ----- Main -----
+const items = await buildFeed();
+await writeFeedJson(items);
+console.log("✅ Build finalizado");
