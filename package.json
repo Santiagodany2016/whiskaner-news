@@ -1,13 +1,14 @@
 {
-  "name": "whisky-news-static",
+  "name": "whiskaner-news",
   "version": "1.0.0",
-  "private": true,
+  "description": "Generador de feed estático de whisky",
   "type": "module",
+  "main": "scripts/build.js",
   "scripts": {
     "build": "node scripts/build.js"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0",
-    "rss-parser": "^3.13.0"
+    "yaml": "^2.5.0",
+    "xml2js": "^0.6.2"
   }
 }
