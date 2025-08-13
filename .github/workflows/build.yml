@@ -1,0 +1,31 @@
+name: Build & Publish Whisky Feed
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # cada hora
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - "sources.yaml"
+      - "scripts/**"
+      - "package.json"
+      - ".github/workflows/build.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci || npm i
+      - run: npm run build
+      - name: Commit feed.json
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: "docs/feed.json"
+          message: "chore: update feed.json [skip ci]"
