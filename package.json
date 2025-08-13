@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Generador de feed estático de whisky",
   "type": "module",
-  "main": "scripts/build.js",
   "scripts": {
     "build": "node scripts/build.js"
   },
