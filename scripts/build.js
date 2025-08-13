@@ -14,7 +14,7 @@ const OUTPUT_DIR = "docs";
 const OUTPUT_FILE = path.join(OUTPUT_DIR, "feed.json");
 const SOURCES_FILE = "sources.yaml";
 const YT_FILE = "youtube_channels.json";
-const YT_KEY = process.env.YT_API_KEY || ""; // ⚠️ agrega este secret en GitHub: YT_API_KEY
+const YT_KEY = process.env.YT_API_KEY || ""; // ⚠️ Secret en GitHub: YT_API_KEY
 
 // ---------- RSS Parser con headers + timeout ----------
 const parser = new RSSParser({
