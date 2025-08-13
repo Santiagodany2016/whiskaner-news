@@ -49,32 +49,6 @@ sources:
     type: "article"
     region: "global"
 
-  # --- YouTube (video) ---
-  - name: "Scotch Test Dummies (YouTube)"
-    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCfXfVnEk3Jt3WezbeuvtqYA"
-    type: "video"
-    region: "global"
-
-  - name: "Ralfy (YouTube)"
-    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCUZqjVQzjY4T1L1R3xj6H9w"
-    type: "video"
-    region: "global"
-
-  - name: "Whiskey Tribe (YouTube)"
-    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCmO7yXzBS7o2R1q8tTq8YVw"
-    type: "video"
-    region: "us"
-
-  - name: "Aqvavitae (YouTube)"
-    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCfsHShbA_RxvBCkntt18fdQ"
-    type: "video"
-    region: "uk"
-
-  - name: "Scotch 4 Dummies (YouTube)"
-    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UChf_GXg_lgQO4OyR6l5S28g"
-    type: "video"
-    region: "us"
-
   # --- Podcasts (RSS públicos) ---
   - name: "WhiskyCast (Podcast)"
     url: "https://whiskycast.libsyn.com/rss"
