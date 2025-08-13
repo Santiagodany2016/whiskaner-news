@@ -1,9 +1,10 @@
-# Edita estas fuentes a tu gusto
+# sources.yaml
 # type: article | video | podcast | book | event
-# region: global | us | uk | eu | jp | etc.
+# region: global | us | uk | jp | ...
 
 sources:
-  - name: Whisky Advocate
+  # --- Artículos / Revistas / Blogs ---
+  - name: Whisky Advocate (revista)
     url: https://whiskyadvocate.com/feed/
     type: article
     region: us
@@ -11,20 +12,70 @@ sources:
   - name: The Whiskey Wash
     url: https://thewhiskeywash.com/feed/
     type: article
-    region: us
+    region: global
+
+  - name: Whiskyfun
+    url: https://whiskyfun.com/whatsnew.xml
+    type: article
+    region: global
+
+  - name: WhiskyNotes
+    url: https://whiskynotes.be/feed
+    type: article
+    region: global
 
   - name: Master of Malt Blog
     url: https://www.masterofmalt.com/blog/feed/
     type: article
     region: uk
 
-  - name: Reddit r/Scotch
-    url: https://www.reddit.com/r/Scotch/.rss
+  - name: The Whiskey Reviewer
+    url: https://whiskeyreviewer.com/feed/
     type: article
     region: global
 
-  # Ejemplo YouTube (reemplaza con tu channel_id)
-  # - name: YouTube - Whisky.com
-  #   url: https://www.youtube.com/feeds/videos.xml?channel_id=UC5n1hE7E3O0XfO6K2Fz4J0g
-  #   type: video
-  #   region: global
+  - name: Bourbon & Banter
+    url: https://bourbonbanter.com/feed/
+    type: article
+    region: us
+
+  - name: Dramface
+    url: https://www.dramface.com/rss
+    type: article
+    region: uk
+
+  - name: Ralfy's Whisky News
+    url: https://ralfywhisky.webnode.be/rss/news-.xml
+    type: article
+    region: global
+
+  # --- YouTube (video) ---
+  - name: Scotch Test Dummies (YouTube)
+    url: https://www.youtube.com/feeds/videos.xml?channel_id=UCfXfVnEk3Jt3WezbeuvtqYA
+    type: video
+    region: global
+
+  - name: Ralfy (YouTube)
+    url: https://www.youtube.com/feeds/videos.xml?channel_id=UCUZqjVQzjY4T1L1R3xj6H9w
+    type: video
+    region: global
+
+  - name: Whiskey Tribe (YouTube)
+    url: https://www.youtube.com/feeds/videos.xml?channel_id=UCmO7yXzBS7o2R1q8tTq8YVw
+    type: video
+    region: us
+
+  - name: Aqvavitae (YouTube)
+    url: https://www.youtube.com/feeds/videos.xml?channel_id=UCfsHShbA_RxvBCkntt18fdQ
+    type: video
+    region: uk
+
+  - name: Scotch 4 Dummies (YouTube)
+    url: https://www.youtube.com/feeds/videos.xml?channel_id=UChf_GXg_lgQO4OyR6l5S28g
+    type: video
+    region: us
+
+  # --- Podcasts (RSS públicos) ---
+  - name: WhiskyCast (Podcast)
+    url: https://
+
