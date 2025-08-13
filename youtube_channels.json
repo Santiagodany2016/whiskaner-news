@@ -1,7 +1,7 @@
 [
-  { "name": "Whiskey Tribe",           "channelId": "UCmO7yXzBS7o2R1q8tTq8YVw", "region": "us" },
-  { "name": "Scotch Test Dummies",     "channelId": "UCfXfVnEk3Jt3WezbeuvtqYA", "region": "global" },
-  { "name": "Aqvavitae",               "channelId": "UCfsHShbA_RxvBCkntt18fdQ", "region": "uk" },
-  { "name": "Scotch 4 Dummies",        "channelId": "UChf_GXg_lgQO4OyR6l5S28g", "region": "us" },
-  { "name": "ralfy",                   "channelId": "UCUZqjVQzjY4T1L1R3xj6H9w", "region": "global" }
+  { "name": "Whiskey Tribe",        "channelId": "UCmO7yXzBS7o2R1q8tTq8YVw", "region": "us" },
+  { "name": "Scotch Test Dummies",  "channelId": "UCfXfVnEk3Jt3WezbeuvtqYA", "region": "global" },
+  { "name": "Aqvavitae",            "channelId": "UCfsHShbA_RxvBCkntt18fdQ", "region": "uk" },
+  { "name": "Scotch 4 Dummies",     "channelId": "UChf_GXg_lgQO4OyR6l5S28g", "region": "us" },
+  { "name": "ralfy",                "channelId": "UCUZqjVQzjY4T1L1R3xj6H9w", "region": "global" }
 ]
