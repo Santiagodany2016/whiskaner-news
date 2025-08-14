@@ -1,7 +1,84 @@
 {
-  "updated_at": "2025-08-14T14:18:18.490Z",
+  "updated_at": "2025-08-14T16:24:40.383Z",
   "count": 800,
   "items": [
+    {
+      "id": "https://thewhiskeywash.com/whiskey-news/woodford-reserve-launches-american-single-malt/",
+      "title": "Woodford Reserve Launches American Single Malt",
+      "url": "https://thewhiskeywash.com/whiskey-news/woodford-reserve-launches-american-single-malt/",
+      "source": "The Whiskey Wash",
+      "type": "article",
+      "region": "global",
+      "published_at": "2025-08-14T16:03:42.000Z",
+      "image": "https://thewhiskeywash.com/wp-content/uploads/2025/08/woodford-reserve-launches-american-single-malt.jpeg",
+      "summary": "Woodford Reserve has unveiled its first age-stated American single malt whiskey, a 12-year-old expression available exclusively in Kentucky starting August 14. Read the full article at Woodford Reserve Launches American Single Malt"
+    },
+    {
+      "id": "https://thewhiskeywash.com/whiskey-news/the-twisted-tail-hosts-11th-annual-whiskey-bonanza/",
+      "title": "The Twisted Tail Hosts 11th Annual Whiskey Bonanza",
+      "url": "https://thewhiskeywash.com/whiskey-news/the-twisted-tail-hosts-11th-annual-whiskey-bonanza/",
+      "source": "The Whiskey Wash",
+      "type": "article",
+      "region": "global",
+      "published_at": "2025-08-14T15:52:25.000Z",
+      "image": "https://thewhiskeywash.com/wp-content/uploads/2025/08/the-twisted-tail-hosts-11th-annual-whiskey-bonanza.jpeg",
+      "summary": "Philadelphia's The Twisted Tail will host its 11th annual Whiskey Bonanza on September 25, featuring more than 100 whiskeys, a cocktail competition, and live blues music. Read the full article at The Twisted Tail Hosts 11th Annual Whiskey Bonanza"
+    },
+    {
+      "id": "https://thewhiskeywash.com/whiskey-news/cedar-ridge-anniversary-edition-bourbon-marks-20-years/",
+      "title": "Cedar Ridge Anniversary Edition Bourbon Marks 20 Years",
+      "url": "https://thewhiskeywash.com/whiskey-news/cedar-ridge-anniversary-edition-bourbon-marks-20-years/",
+      "source": "The Whiskey Wash",
+      "type": "article",
+      "region": "global",
+      "published_at": "2025-08-14T15:44:16.000Z",
+      "image": "https://thewhiskeywash.com/wp-content/uploads/2025/08/cedar-ridge-anniversary-edition-bourbon-marks-20-years.jpeg",
+      "summary": "Cedar Ridge Distillery launches its first Anniversary Edition Bourbon, a limited release featuring four different cask finishes to commemorate 20 years of Iowa whiskey production. Read the full article at Cedar Ridge Anniversary Edition Bourbon Marks 20 Years"
+    },
+    {
+      "id": "https://www.masterofmalt.com/blog/post/do-age-statements-matter.aspx/",
+      "title": "Do age statements matter?",
+      "url": "https://www.masterofmalt.com/blog/post/do-age-statements-matter.aspx/",
+      "source": "Master of Malt Blog",
+      "type": "article",
+      "region": "uk",
+      "published_at": "2025-08-14T14:30:48.000Z",
+      "image": "https://www.masterofmalt.com/blog/wp-content/uploads/2025/01/GlenAllachie-whisky-1024x682.jpg",
+      "summary": "The whisky world loves a number. For years, age statements were shorthand for quality. The older, the better, right? But experience, nuance, and a savvier whisky crowd have shown there’s... The post Do age statements matter? appeared first on Master of Malt blog."
+    },
+    {
+      "id": "https://www.bourbonbanter.com/last-call-2025-b-b-summit/",
+      "title": "Last Call: 2025 B&B Summit",
+      "url": "https://www.bourbonbanter.com/last-call-2025-b-b-summit/",
+      "source": "Bourbon & Banter",
+      "type": "article",
+      "region": "us",
+      "published_at": "2025-08-14T14:30:04.000Z",
+      "image": null,
+      "summary": null
+    },
+    {
+      "id": "https://thewhiskeywash.com/whiskey-news/flaviar-launched-their-2025-advent-calendar-flaviair/",
+      "title": "Flaviar launched their 2025 Advent Calendar, FlaviAIR",
+      "url": "https://thewhiskeywash.com/whiskey-news/flaviar-launched-their-2025-advent-calendar-flaviair/",
+      "source": "The Whiskey Wash",
+      "type": "article",
+      "region": "global",
+      "published_at": "2025-08-14T14:23:33.000Z",
+      "image": "https://thewhiskeywash.com/wp-content/uploads/2025/08/flaviar-launched-their-2025-advent-calendar_-flavi-a-i-r-1.jpg",
+      "summary": "Flaviar's 2025 FlaviAIR Advent Calendar takes whiskey lovers on a global tasting journey with 24 premium spirits from around the world. The $270 collection includes rare finds, custom Glencairn glasses, and a 12-month Flaviar Black membership. Read the full article at Flaviar launched their 2025 Advent Calendar, FlaviAIR"
+    },
+    {
+      "id": "https://thewhiskeywash.com/whiskey-reviews/review-crown-royal16-year-old-rye-noble-collection-2025/",
+      "title": "Crown Royal 16 Year Old Rye: Noble Collection Review",
+      "url": "https://thewhiskeywash.com/whiskey-reviews/review-crown-royal16-year-old-rye-noble-collection-2025/",
+      "source": "The Whiskey Wash",
+      "type": "article",
+      "region": "global",
+      "published_at": "2025-08-14T14:20:16.000Z",
+      "image": null,
+      "summary": "Crown Royal's 16-year-old rye whisky delivers a bold, sweet profile with classic notes of mint, tobacco, and vanilla. A rare find that showcases both the earthy qualities of rye and Crown Royal's signature mellow character. Read the full article at Crown Royal 16 Year Old Rye: Noble Collection Review"
+    },
     {
       "id": "https://thewhiskeywash.com/whiskey-articles/the-best-kentucky-straight-bourbons-according-to-experts/",
       "title": "The Best Kentucky Straight Bourbons According To Experts",
@@ -212,39 +289,6 @@
       "summary": "Scottish distiller Glengoyne has unveiled its latest limited-edition release, combining traditional Highland whisky-making with prized Japanese Mizunara oak casks in a 16-year-old expression. Read the full article at Glengoyne Launches Rare Mizunara Oak Whisky"
     },
     {
-      "id": "https://thewhiskeywash.com/whiskey-news/hoochenanny-2025-whiskey-festival-attracts-record-crowds-to-rochester/",
-      "title": "Hoochenanny 2025 Whiskey Festival Attracts Record Crowds To Rochester",
-      "url": "https://thewhiskeywash.com/whiskey-news/hoochenanny-2025-whiskey-festival-attracts-record-crowds-to-rochester/",
-      "source": "The Whiskey Wash",
-      "type": "article",
-      "region": "global",
-      "published_at": "2025-08-12T13:48:42.000Z",
-      "image": "https://thewhiskeywash.com/wp-content/uploads/2025/08/hoochenanny-2025-whiskey-festival-attracts-record-crowds-to-rochester.jpeg",
-      "summary": "Over 8,000 whiskey enthusiasts and music fans descended on Rochester's Camp Eastman for the second annual Hoochenanny festival. The three-day event raised more than $28,500 for its chosen charities. Read the full article at Hoochenanny 2025 Whiskey Festival Attracts Record Crowds To Rochester"
-    },
-    {
-      "id": "https://thewhiskeywash.com/whiskey-news/old-fitzgerald-releases-vvs-2025-11-year-old-bottled-in-bond-bourbon-whiskey/",
-      "title": "Old Fitzgerald Releases VVS 2025: 11-Year-old Bottled In Bond Bourbon Whiskey",
-      "url": "https://thewhiskeywash.com/whiskey-news/old-fitzgerald-releases-vvs-2025-11-year-old-bottled-in-bond-bourbon-whiskey/",
-      "source": "The Whiskey Wash",
-      "type": "article",
-      "region": "global",
-      "published_at": "2025-08-12T12:58:52.000Z",
-      "image": "https://thewhiskeywash.com/wp-content/uploads/2025/08/old-fitzgerald-releases-v-v-s-2025_-11-year-old-bottled-in-bond-bourbon-whiskey.jpeg",
-      "summary": "Heaven Hill's Old Fitzgerald brand has released 2025 VVS bourbon whiskey, an 11-year-old Bottled-in-Bond expression. It follows on from the VVS 2024, which was named \"Best Bourbon in the World\" at the World Whiskies Awards. Read the full article at Old Fitzgerald Releases VVS 2025: 11-Year-old Bottled In Bond Bourbon Whiskey"
-    },
-    {
-      "id": "https://thewhiskeywash.com/whiskey-articles/7-things-you-wanted-to-know-about-jim-beam/",
-      "title": "7 Things You Wanted To Know About Jim Beam",
-      "url": "https://thewhiskeywash.com/whiskey-articles/7-things-you-wanted-to-know-about-jim-beam/",
-      "source": "The Whiskey Wash",
-      "type": "article",
-      "region": "global",
-      "published_at": "2025-08-12T12:47:34.000Z",
-      "image": "https://thewhiskeywash.com/wp-content/uploads/2025/08/featured-image-1754899815.jpg",
-      "summary": "Jim Beam has been shaping American bourbon for over 225 years, but there's more to this Kentucky whiskey than meets the eye. From surviving Prohibition with a secret yeast strain to pioneering premium bourbon, here are seven surprising facts about the world's best-selling bourbon. Read the full article at 7 Things You Wanted To Know About Jim Beam"
-    },
-    {
       "id": "https://bourbonpursuit.com/2025/08/12/whiskey-quickie-larrikin-rose-water-bourbon-review",
       "title": "Whiskey Quickie: Larrikin Rosewater Bourbon Review",
       "url": "https://bourbonpursuit.com/2025/08/12/whiskey-quickie-larrikin-rose-water-bourbon-review",
@@ -287,28 +331,6 @@
       "published_at": "2025-08-11T22:41:05.000Z",
       "image": "https://www.whiskynotes.be/wp-content/uploads/2025/08/glenallachie-2007-single-cask-6453-whisky-exchange-120x300.jpg",
       "summary": "Just now The Whisky Exchange presented its latest exclusive. It is a GlenAllachie 2007 which rested 14 years in first-fill bourbon and 4 years in a virgin American oak barrel. This is probably the smartest option for new oak, not letting the raw wood overtake the spirit. As you know virgin oak is quite a big theme for this distillery."
-    },
-    {
-      "id": "https://thewhiskeywash.com/whiskey-news/give-270-raffles-25-year-eagle-rare-for-charity/",
-      "title": "Give 270 Raffles 25 Year Eagle Rare for Charity",
-      "url": "https://thewhiskeywash.com/whiskey-news/give-270-raffles-25-year-eagle-rare-for-charity/",
-      "source": "The Whiskey Wash",
-      "type": "article",
-      "region": "global",
-      "published_at": "2025-08-11T15:44:10.000Z",
-      "image": "https://thewhiskeywash.com/wp-content/uploads/2025/08/give-270-raffles-25-year-eagle-rare-for-charity.jpeg",
-      "summary": "Give 270 will raffle a bottle of Eagle Rare 25, the oldest release in the Eagle Rare portfolio, on September 24. The Kentucky nonprofit's 20/20 Unicorn raffle offers $20 tickets for chances at 20 total prizes. Read the full article at Give 270 Raffles 25 Year Eagle Rare for Charity"
-    },
-    {
-      "id": "https://thewhiskeywash.com/whiskey-news/bhakta-launches-35-year-old-1989-calvados/",
-      "title": "BHAKTA Launches 35 Year Old 1989 Calvados",
-      "url": "https://thewhiskeywash.com/whiskey-news/bhakta-launches-35-year-old-1989-calvados/",
-      "source": "The Whiskey Wash",
-      "type": "article",
-      "region": "global",
-      "published_at": "2025-08-11T15:34:57.000Z",
-      "image": "https://thewhiskeywash.com/wp-content/uploads/2025/08/b-h-a-k-t-a-launches-35-year-old-1989-calvados.jpeg",
-      "summary": "BHAKTA Spirits has unveiled its first single-varietal Calvados, a 35-year-old expression from 1989 that earned 98 points from the Beverage Tasting Institute. Read the full article at BHAKTA Launches 35 Year Old 1989 Calvados"
     },
     {
       "id": "https://whiskeyreviewer.com/2025/08/glen-scotia-10-year-old-scotch-review-081125/",
@@ -571,7 +593,7 @@
       "type": "article",
       "region": "uk",
       "published_at": "2025-08-04T08:01:29.000Z",
-      "image": "https://www.masterofmalt.com/blog/wp-content/uploads/2025/08/Championships-1024x576.jpg",
+      "image": "https://www.masterofmalt.com/blog/wp-content/uploads/2025/08/WhiskyChamps2025-1024x701.png",
       "summary": "The Whisky Championships 2025 have officially kicked off. It’s back. Louder. Bolder. More dramatic than ever. Once again, we’re pitting some of the most significant names in whisky against each... The post Our Whisky Championships 2025 is here! appeared first on Master of Malt blog."
     },
     {
@@ -1134,17 +1156,6 @@
       "published_at": "2025-07-17T09:30:00.000Z",
       "image": "https://www.podtrac.com/pts/redirect.mp3/pdst.fm/e/traffic.megaphone.fm/BPLLC2976356449.mp3?updated=1753931546",
       "summary": "One of the topics I love to dive into on the show is retail. This is where the rubber meets the road because it's the telling sign if a brand or category is alive or dying. I'm excited to welcome Chris Blandford back on the show. He holds the title of Adult Beverage Field Specialist for Kroger. He’s right there on the front lines of consumer trends, and he’s got some amazing insights into the changing landscape of bourbon, and he's also the content development lead for the bourbon and culinary stage at Bourbon & Beyond, a music festival right here in Louisville you've heard us talk about before. We talk about evolving consumer tastes because there is a trend back towards lower proof whiskey and some hilarious stories about those high-potency THC infused drinks that are making waves. Chris also shares his inspiring personal journey of health transformation, which is a fantastic parallel to his work. Plus, you’ll get a sneak peek into the exciting experiences waiting for everyone at Bourbon & Beyond. Show Notes: Who is Chris Blandford and his role at Kroger? Insights on rising trends among bourbon consumers. Discussion on the interest in lower-proof, approachable bourbons. Unique bourbon blend produced for Bourbon & Beyond. Reactions to various bourbons tasted and discussed. Chris's health and fitness transformation journey. Kroger’s partnership significance with Bourbon & Beyond. Resources for aspiring bourbon distillers and entrepreneurs. Humorous exchanges surrounding bourbon experiences. Support this podcast on Patreon Learn more about your ad choices. Visit megaphone.fm/adchoices"
-    },
-    {
-      "id": "https://www.masterofmalt.com/blog/post/the-english-distillery.aspx/",
-      "title": "The birthplace of England’s whisky renaissance: The English Distillery",
-      "url": "https://www.masterofmalt.com/blog/post/the-english-distillery.aspx/",
-      "source": "Master of Malt Blog",
-      "type": "article",
-      "region": "uk",
-      "published_at": "2025-07-17T09:00:41.000Z",
-      "image": "https://www.masterofmalt.com/blog/wp-content/uploads/2025/07/EDCM-31-1024x647.jpg",
-      "summary": "The English Distillery was founded in 2006 by James Nelstrop and his son, Andrew. An English whisky distillery isn’t peculiar these days. There are over 60 of them. Open a whisky... The post The birthplace of England’s whisky renaissance: The English Distillery appeared first on Master of Malt blog."
     },
     {
       "id": "https://www.whiskyfun.com/2025/A-Fettercairn-trio-formerly-Old-Fettercairn.html",
@@ -1739,17 +1750,6 @@
       "published_at": "2025-06-22T00:00:00.000Z",
       "image": null,
       "summary": "Don Papa ‘Gayuma’ (40%, OB, Philippines, +/-2025) Dictador 24 yo 1996/2020 ‘Capitulo I’ (44%, OB, Colombia, sherry cask, cask #ExSH-548, 900 bottles) Braud & Quennesson ‘Signature du Chai Double Essence’ (49%, OB, Martinique, agricole, +/-2025) TDL 2023/2024 (55.6%, The Whisky Jury, Trinidad, cask #10, 272 bottles) Jamaican Rum 14 yo 2010/2025 (52.9%, Fadandel, refill barrel, cask #4, 254 bottles) Caroni 25 yo 1998/2024 (62.8%, The Whisky Blues, Trinidad, STR barrel, cask #2290, 202 bottles) Clarendon 22 yo 2000/2023 (44.3%, Rum Sponge, Jamaica, 146 bottles) Hampden Estate 'Pagos Batch 3' (52%, OB for LMDW and Velier, Jamaica, sherry, 2024) Caroni 1999/2024 (63.9%, Silver Seal, LMDW Foundations, Trinidad, cask #184, 150 bottles) Foursquare 20 yo 2004/2025 ‘Fidelitas’ (55%, La Maison & Velier, Barbados)"
-    },
-    {
-      "id": "https://www.bourbonbanter.com/proof-of-life-get-lost/",
-      "title": "Proof of Life: Get Lost",
-      "url": "https://www.bourbonbanter.com/proof-of-life-get-lost/",
-      "source": "Bourbon & Banter",
-      "type": "article",
-      "region": "us",
-      "published_at": "2025-06-21T12:00:15.000Z",
-      "image": "https://www.bourbonbanter.com/content/images/2025/06/Proof-of-Life-Newsletter-Header---Get-Lost.png",
-      "summary": "Irregular Dispatches for the Drinking Class from Your Chief Drinking Officer"
     },
     {
       "id": "https://bourbonpursuit.com/2025/06/20/twib-whiskey-house-the-koetter-group-new-projects-new-makers-mark-exhibition-by-dale-chihuly-dierks-bentley-introduces-row-94-broken-branches",
