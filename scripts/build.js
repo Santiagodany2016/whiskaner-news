@@ -1,151 +1,80 @@
-// build.js - Whiskaner News feed builder (solo RSS, ESM, sin imágenes en podcasts)
-import fs from 'node:fs';
-import path from 'node:path';
+import { parse } from 'rss-parser';
 import YAML from 'yaml';
-import Parser from 'rss-parser';
+import fs from 'fs/promises';
+import path from 'path';
 
-const parser = new Parser({
-  timeout: 20000,
-  headers: { 'user-agent': 'whiskaner-news/1.0' }
-});
-
-const ROOT = process.cwd();
-const OUTPUT_DIR = path.join(ROOT, 'docs');
-const OUTPUT_FILE = path.join(OUTPUT_DIR, 'feed.json');
-
-const MAX_ITEMS = parseInt(process.env.MAX_ITEMS || '800', 10);
-
-function safeDate(d) {
-  const t = new Date(d);
-  return Number.isNaN(t.getTime()) ? null : t.toISOString();
-}
-
-function normalizeItem(base) {
-  const published =
-    base.published_at || base.pubDate || base.isoDate || base.date;
-  const published_at = safeDate(published) || new Date(0).toISOString();
-  return {
-    id: base.id || base.url || base.link,
-    type: base.type || 'article',
-    url: base.url || base.link,
-    title: (base.title || '').toString().trim(),
-    source: base.source || '',
-    region: base.region || 'global',
-    // Artículos: permitimos imagen; Podcasts: nunca imagen
-    image: (base.type === 'podcast') ? null : (base.image || base.enclosure?.url || null),
-    published_at
-  };
-}
-
-function dedupe(items) {
-  const seen = new Set();
-  const out = [];
-  for (const it of items) {
-    const key = (it.id || it.url || '').toLowerCase();
-    if (!key) continue;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(it);
-  }
-  return out;
-}
-
-async function loadSourcesYaml() {
-  const p = path.join(ROOT, 'sources.yaml');
-  if (!fs.existsSync(p)) {
-    console.warn('sources.yaml no encontrado, se omiten RSS.');
-    return [];
-  }
-  const raw = fs.readFileSync(p, 'utf8');
-  const data = YAML.parse(raw);
-  if (!Array.isArray(data)) {
-    console.warn('sources.yaml no es una lista; se omiten RSS.');
-    return [];
-  }
-  return data;
-}
-
-async function fetchFeed(url, kind, meta = {}) {
-  try {
-    const feed = await parser.parseURL(url);
-    const items = (feed.items || []).map((it) =>
-      normalizeItem({
-        type: kind,
-        url: it.link,
-        title: it.title,
-        source: meta.source || feed.title || '',
-        region: meta.region || 'global',
-        image: it.enclosure?.url || null,
-        published_at: it.isoDate || it.pubDate
-      })
-    );
-    console.log(
-      `RSS: ${kind.padEnd(7)} -> ${items.length} items (${meta.source || url})`
-    );
-    return items;
-  } catch (e) {
-    console.warn(`RSS: fallo al leer ${kind} :: ${url} :: ${e.message}`);
-    return [];
-  }
-}
-
-async function loadRssItems() {
-  const sources = await loadSourcesYaml();
-  const tasks = [];
-  for (const s of sources) {
-    if (!s || !s.type || !s.url) continue;
-    const kind = s.type.toLowerCase().trim();
-    if (kind === 'article' || kind === 'podcast') {
-      tasks.push(fetchFeed(s.url, kind, { source: s.source, region: s.region }));
-    }
-  }
-  const results = await Promise.all(tasks);
-  return results.flat();
-}
+const MAX_ITEMS = 800;
+const USER_AGENT = 'whiskaner-news/1.0';
 
 async function main() {
-  const started = Date.now();
-  console.log('==== Build start (solo RSS, sin imágenes en podcasts) ====');
+  try {
+    console.log('📰 Iniciando construcción de feed...');
+    
+    // Leer fuentes
+    const sourcesYaml = await fs.readFile('./sources.yaml', 'utf-8');
+    const sources = YAML.parse(sourcesYaml).feeds;
 
-  let merged = await loadRssItems();
+    let allItems = [];
+    
+    // Procesar cada fuente
+    for (const source of sources) {
+      if (!['article', 'podcast'].includes(source.type)) {
+        console.warn(`⚠️  Tipo '${source.type}' ignorado para ${source.url}`);
+        continue;
+      }
 
-  // Garantizado: no videos
-  merged = merged.filter((i) => i.type !== 'video');
+      try {
+        console.log(`🔍 Procesando ${source.source}...`);
+        const parser = new parse({
+          timeout: 20000,
+          headers: { 'User-Agent': USER_AGENT }
+        });
 
-  merged = dedupe(merged);
-  merged.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
+        const feed = await parser.parseURL(source.url);
+        
+        // Normalizar items
+        const normalizedItems = feed.items.map(item => ({
+          id: item.guid || item.link.toLowerCase(),
+          type: source.type,
+          url: item.link,
+          title: item.title.trim(),
+          source: source.source,
+          region: source.region,
+          image: source.type === 'article' && item.enclosure?.url ? item.enclosure.url : null,
+          published_at: item.isoDate || item.pubDate || new Date(0).toISOString()
+        }));
 
-  const finalItems = merged.slice(0, MAX_ITEMS);
+        allItems.push(...normalizedItems);
+      } catch (error) {
+        console.error(`❌ Error procesando ${source.url}:`, error.message);
+      }
+    }
 
-  const counts = finalItems.reduce((acc, it) => {
-    acc[it.type] = (acc[it.type] || 0) + 1;
-    return acc;
-  }, {});
-  console.log(`Conteo por tipo: ${JSON.stringify(counts, null, 2)}`);
-  console.log(`OK -> docs/feed.json items: ${finalItems.length}`);
+    // Deduplicar y ordenar
+    const uniqueItems = Array.from(
+      new Map(allItems.map(item => [item.id, item])).values()
+    ).sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
-  if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-  fs.writeFileSync(
-    OUTPUT_FILE,
-    JSON.stringify(
-      {
-        generated_at: new Date().toISOString(),
-        total: finalItems.length,
-        items: finalItems
-      },
-      null,
-      2
-    ),
-    'utf8'
-  );
+    // Limitar cantidad
+    const limitedItems = uniqueItems.slice(0, MAX_ITEMS);
 
-  const ms = Date.now() - started;
-  console.log(`==== Build end (${ms} ms) ====`);
+    // Crear directorio docs si no existe
+    await fs.mkdir('./docs', { recursive: true });
+
+    // Escribir archivo
+    const output = {
+      generated_at: new Date().toISOString(),
+      total: limitedItems.length,
+      items: limitedItems
+    };
+
+    await fs.writeFile('./docs/feed.json', JSON.stringify(output, null, 2));
+    console.log(`✅ Feed generado con ${limitedItems.filter(i => i.type === 'article').length} artículos y ${limitedItems.filter(i => i.type === 'podcast').length} podcasts`);
+
+  } catch (error) {
+    console.error('❌ Error crítico:', error);
+    process.exit(1);
+  }
 }
 
-try {
-  await main();
-} catch (e) {
-  console.error('Build failed:', e);
-  process.exit(1);
-}
+main();
