@@ -45,11 +45,15 @@ jobs:
             echo "No package.json - skipping install"
           fi
 
-      - name: Debug (no YouTube)
+      - name: Ensure docs directory
+        run: |
+          mkdir -p docs
+          ls -la
+
+      - name: Debug (RSS-only)
         run: |
           node -v
-          ls -la
-          echo "Build sin YouTube"
+          echo "Build sin YouTube; solo artículos y podcasts por RSS"
 
       - name: Build feed.json
         run: |
@@ -76,14 +80,12 @@ jobs:
             attempts=$((attempts+1))
             echo "Intento $attempts de 3"
 
-            # Asegura estar actualizado y rebasea
             git fetch origin main
             git checkout -B main
             git add docs/feed.json
             git commit -m "chore(feed): update feed.json (rss-only) [skip ci]" || true
             git rebase origin/main || { echo "Rebase falló, reintentando..."; git rebase --abort || true; }
 
-            # Push seguro: usa --force-with-lease para no pisar cambios ajenos
             if git push --force-with-lease origin main; then
               echo "Push exitoso."
               exit 0
