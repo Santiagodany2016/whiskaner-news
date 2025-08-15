@@ -1,99 +1,39 @@
-name: Build & Publish Whiskaner News
+name: Build and Deploy Whiskaner News
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "23 */6 * * *" # cada 6h
-
-permissions:
-  contents: write
-
-# Evita conflictos cuando corren builds en paralelo sobre la misma rama
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    - cron: '0 */6 * * *'  # Cada 6 horas
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      NODE_OPTIONS: --max-old-space-size=4096
-      MAX_ITEMS: 800
-
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node
+        
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install dependencies (ci if lockfile, else install)
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build feed
+        run: npm run build
+        
+      - name: Commit changes
+        if: github.event_name != 'schedule'
         run: |
-          if [ -f package.json ]; then
-            if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
-              echo "Lockfile detectado -> npm ci"
-              npm ci
-            else
-              echo "Sin lockfile -> npm install"
-              npm install --no-audit --no-fund
-            fi
-          else
-            echo "No package.json - skipping install"
-          fi
-
-      - name: Ensure docs directory
-        run: |
-          mkdir -p docs
-          ls -la
-
-      - name: Debug (RSS-only)
-        run: |
-          node -v
-          echo "Build sin YouTube; solo artículos y podcasts por RSS"
-
-      - name: Build feed.json
-        run: |
-          node scripts/build.js
-          echo "========== build.js finished =========="
-
-      - name: Commit & push docs/feed.json (rebase + retry)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -e
-          if git diff --quiet -- docs/feed.json; then
-            echo "No changes to commit."
-            exit 0
-          fi
-
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Intentos para evitar non-fast-forward
-          attempts=0
-          until [ $attempts -ge 3 ]
-          do
-            attempts=$((attempts+1))
-            echo "Intento $attempts de 3"
-
-            git fetch origin main
-            git checkout -B main
-            git add docs/feed.json
-            git commit -m "chore(feed): update feed.json (rss-only) [skip ci]" || true
-            git rebase origin/main || { echo "Rebase falló, reintentando..."; git rebase --abort || true; }
-
-            if git push --force-with-lease origin main; then
-              echo "Push exitoso."
-              exit 0
-            fi
-
-            echo "Push rechazado. Reintentando en 3s..."
-            sleep 3
-          done
-
-          echo "No se pudo pushear tras 3 intentos." >&2
-          exit 1
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add docs/feed.json
+          git commit -m "Update feed.json" || echo "No changes to commit"
+          
+      - name: Push changes
+        if: github.event_name != 'schedule' && success()
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          branch: main
+          force: true
