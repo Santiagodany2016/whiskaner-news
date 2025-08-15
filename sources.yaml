@@ -1,76 +1,22 @@
-# sources.yaml
-# type: article | video | podcast | book | event
-# region: global | us | uk | jp | ...
+# --- ARTÍCULOS (funcionan para probar rápido) ---
+- type: article
+  url: https://www.reddit.com/r/whisky/.rss
+  source: r/whisky
+  region: global
 
-sources:
-  # --- Artículos / Revistas / Blogs ---
-  - name: "Whisky Advocate (revista)"
-    url: "https://whiskyadvocate.com/feed/"
-    type: "article"
-    region: "us"
+- type: article
+  url: https://www.reddit.com/r/scotch/.rss
+  source: r/scotch
+  region: global
 
-  - name: "The Whiskey Wash"
-    url: "https://thewhiskeywash.com/feed/"
-    type: "article"
-    region: "global"
+# --- PODCASTS (al menos 1 seguro para validar) ---
+- type: podcast
+  url: https://whiskycast.libsyn.com/rss
+  source: WhiskyCast
+  region: global
 
-  - name: "Whiskyfun"
-    url: "https://whiskyfun.com/whatsnew.xml"
-    type: "article"
-    region: "global"
-
-  - name: "WhiskyNotes"
-    url: "https://whiskynotes.be/feed"
-    type: "article"
-    region: "global"
-
-  - name: "Master of Malt Blog"
-    url: "https://www.masterofmalt.com/blog/feed/"
-    type: "article"
-    region: "uk"
-
-  - name: "The Whiskey Reviewer"
-    url: "https://whiskeyreviewer.com/feed/"
-    type: "article"
-    region: "global"
-
-  - name: "Bourbon & Banter"
-    url: "https://bourbonbanter.com/feed/"
-    type: "article"
-    region: "us"
-
-  - name: "Dramface"
-    url: "https://www.dramface.com/rss"
-    type: "article"
-    region: "uk"
-
-  - name: "Ralfy's Whisky News"
-    url: "https://ralfywhisky.webnode.be/rss/news-.xml"
-    type: "article"
-    region: "global"
-
-  # --- Podcasts (RSS públicos) ---
-  - name: "WhiskyCast (Podcast)"
-    url: "https://whiskycast.libsyn.com/rss"
-    type: "podcast"
-    region: "global"
-
-  - name: "The Whisky Topic (Podcast)"
-    url: "https://feeds.sounder.fm/20384/rss.xml"
-    type: "podcast"
-    region: "global"
-
-  - name: "One Nation Under Whisky (Podcast)"
-    url: "https://onenationunderwhisky.libsyn.com/rss"
-    type: "podcast"
-    region: "global"
-
-  - name: "Bourbon Pursuit (Podcast)"
-    url: "https://bourbonpursuit.libsyn.com/rss"
-    type: "podcast"
-    region: "us"
-
-  - name: "Whisky Unscripted (Podcast)"
-    url: "https://anchor.fm/s/2f34c7cc/podcast/rss"
-    type: "podcast"
-    region: "uk"
+# Si quieres un podcast 100% confiable aunque no sea “de whisky”, deja este también:
+- type: podcast
+  url: https://feeds.npr.org/510289/podcast.xml
+  source: Planet Money
+  region: us
