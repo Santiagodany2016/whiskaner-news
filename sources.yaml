@@ -1,22 +1,15 @@
-# --- ARTÍCULOS (funcionan para probar rápido) ---
-- type: article
-  url: https://www.reddit.com/r/whisky/.rss
-  source: r/whisky
-  region: global
-
-- type: article
-  url: https://www.reddit.com/r/scotch/.rss
-  source: r/scotch
-  region: global
-
-# --- PODCASTS (al menos 1 seguro para validar) ---
-- type: podcast
-  url: https://whiskycast.libsyn.com/rss
-  source: WhiskyCast
-  region: global
-
-# Si quieres un podcast 100% confiable aunque no sea “de whisky”, deja este también:
-- type: podcast
-  url: https://feeds.npr.org/510289/podcast.xml
-  source: Planet Money
-  region: us
+feeds:
+  - type: article
+    url: https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
+    source: The New York Times
+    region: USA
+  
+  - type: article
+    url: https://techcrunch.com/feed/
+    source: TechCrunch
+    region: USA
+  
+  - type: podcast
+    url: https://feeds.simplecast.com/qdSzqZ5Q
+    source: Simplecast Test
+    region: Global
