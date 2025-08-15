@@ -26,10 +26,16 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install deps (optional)
+      - name: Install dependencies (ci if lockfile, else install)
         run: |
           if [ -f package.json ]; then
-            npm ci
+            if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+              echo "Lockfile detectado -> npm ci"
+              npm ci
+            else
+              echo "Sin lockfile -> npm install"
+              npm install --no-audit --no-fund
+            fi
           else
             echo "No package.json - skipping install"
           fi
