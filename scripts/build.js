@@ -1,237 +1,261 @@
-// scripts/build.js — Build estable: RSS robusto + YouTube API (Node 20+)
+/* build.js - Whiskaner News feed builder
+ * Node 20.x (tiene fetch global). Requiere:
+ *   - rss-parser
+ *   - yaml
+ *
+ * Asegúrate que package.json incluya (si usas deps):
+ *   "rss-parser": "^3.12.0",
+ *   "yaml": "^2.4.0"
+ */
 
-import fs from "fs";
-import path from "path";
-import YAML from "js-yaml";
-import RSSParser from "rss-parser";
+const fs = require('fs');
+const path = require('path');
+const YAML = require('yaml');
+const Parser = require('rss-parser');
 
-// ---------- Config ----------
-const UA =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
-
-const MAX_ITEMS = 800;
-const OUTPUT_DIR = "docs";
-const OUTPUT_FILE = path.join(OUTPUT_DIR, "feed.json");
-const SOURCES_FILE = "sources.yaml";
-const YT_FILE = "youtube_channels.json";
-const YT_KEY = process.env.YT_API_KEY || ""; // ⚠️ viene del Secret
-
-// ---------- RSS Parser con headers + timeout ----------
-const parser = new RSSParser({
-  requestOptions: {
-    headers: {
-      "User-Agent": UA,
-      Accept:
-        "application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.8",
-    },
-    redirect: "follow",
-  },
+const parser = new Parser({
   timeout: 20000,
+  headers: { 'user-agent': 'whiskaner-news/1.0' }
 });
 
-// ---------- Helpers ----------
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const ROOT = process.cwd();
+const OUTPUT_DIR = path.join(ROOT, 'docs');
+const OUTPUT_FILE = path.join(OUTPUT_DIR, 'feed.json');
 
-async function fetchWithTimeout(url, ms = 20000) {
-  const ctrl = new AbortController();
-  const id = setTimeout(() => ctrl.abort("timeout"), ms);
-  try {
-    const res = await fetch(url, {
-      signal: ctrl.signal,
-      headers: {
-        "User-Agent": UA,
-        Accept:
-          "application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.8",
-      },
-      redirect: "follow",
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.text();
-  } finally {
-    clearTimeout(id);
-  }
+const MAX_ITEMS = parseInt(process.env.MAX_ITEMS || '800', 10);
+const VIDEO_MIN = parseInt(process.env.VIDEO_MIN || '100', 10); // cupo mínimo de videos
+
+const YT_KEY = process.env.YT_API_KEY;
+
+// ---------- utilidades ----------
+function safeDate(d) {
+  const t = new Date(d);
+  return isNaN(t.getTime()) ? null : t.toISOString();
 }
 
-async function parseFeed(url, name, retries = 2) {
-  let lastErr;
-  for (let i = 0; i <= retries; i++) {
-    try {
-      return await parser.parseURL(url);
-    } catch (e1) {
-      lastErr = e1;
-      try {
-        const xml = await fetchWithTimeout(url, 20000);
-        return await parser.parseString(xml);
-      } catch (e2) {
-        lastErr = e2;
-      }
-      await sleep(700 * (i + 1));
-    }
-  }
-  console.error("Error en fuente:", name || url, String(lastErr?.message || lastErr));
-  return null;
-}
-
-function ensureDir(dir) {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-}
-
-function firstImage(entry) {
-  if (entry.enclosure?.url) return entry.enclosure.url;
-  const content = String(entry["content:encoded"] || entry.content || "");
-  const m = content.match(/<img[^>]+src=["']([^"']+)["']/i);
-  return m ? m[1] : null;
-}
-
-function stripHtml(html) {
-  return String(html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function hostnameOf(url) {
-  try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; }
-}
-
-function toItemSchema({
-  id, title, url, source, type, region, published_at, image, summary,
-}) {
+function normalizeItem(base) {
+  // Campos mínimos y normalización de fechas
+  const published = base.published_at || base.pubDate || base.isoDate || base.date;
+  const published_at = safeDate(published) || new Date(0).toISOString();
   return {
-    id: id || url,
-    title: title || "(sin título)",
-    url,
-    source,
-    type: type || "article",
-    region: region || "global",
-    published_at: published_at || null,
-    image: image || null,
-    summary: summary || null,
+    id: base.id || base.url || base.link,
+    type: base.type || 'article',
+    url: base.url || base.link,
+    title: (base.title || '').toString().trim(),
+    source: base.source || '',
+    region: base.region || 'global',
+    image: base.image || base.enclosure?.url || null,
+    published_at
   };
 }
 
-// ---------- YouTube (API oficial) ----------
-async function fetchYouTubeVideos() {
-  if (!YT_KEY) {
-    console.warn("YT_API_KEY ausente: se omiten videos de YouTube.");
+function dedupe(items) {
+  const seen = new Set();
+  const out = [];
+  for (const it of items) {
+    const key = (it.id || it.url || '').toLowerCase();
+    if (!key) continue;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(it);
+  }
+  return out;
+}
+
+// ---------- RSS (artículos / podcasts) ----------
+async function loadSourcesYaml() {
+  const p = path.join(ROOT, 'sources.yaml');
+  if (!fs.existsSync(p)) {
+    console.warn('sources.yaml no encontrado, se omiten RSS.');
     return [];
   }
-  if (!fs.existsSync(YT_FILE)) return [];
+  const raw = fs.readFileSync(p, 'utf8');
+  const data = YAML.parse(raw);
+  // Se espera una lista de objetos con al menos { type, url, source?, region? }
+  if (!Array.isArray(data)) {
+    console.warn('sources.yaml no es una lista; se omiten RSS.');
+    return [];
+  }
+  return data;
+}
 
-  const channels = JSON.parse(fs.readFileSync(YT_FILE, "utf-8"));
-  let all = [];
+async function fetchFeed(url, kind, meta = {}) {
+  try {
+    const feed = await parser.parseURL(url);
+    const items = (feed.items || []).map((it) =>
+      normalizeItem({
+        type: kind, // 'article' o 'podcast'
+        url: it.link,
+        title: it.title,
+        source: meta.source || feed.title || '',
+        region: meta.region || 'global',
+        image: it.enclosure?.url || null,
+        published_at: it.isoDate || it.pubDate
+      })
+    );
+    console.log(`RSS: ${kind.padEnd(7)} -> ${items.length} items (${meta.source || url})`);
+    return items;
+  } catch (e) {
+    console.warn(`RSS: fallo al leer ${kind} :: ${url} :: ${e.message}`);
+    return [];
+  }
+}
 
-  for (const ch of channels) {
-    try {
-      const url =
-        `https://www.googleapis.com/youtube/v3/search` +
-        `?key=${encodeURIComponent(YT_KEY)}` +
-        `&channelId=${encodeURIComponent(ch.channelId)}` +
-        `&part=snippet` +
-        `&order=date` +
-        `&type=video` +
-        `&maxResults=8`;
-
-      const res = await fetch(url, {
-        headers: { "User-Agent": UA, Accept: "application/json" },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-
-      const vids = (data.items || [])
-        .filter((it) => it.id?.videoId && it.snippet)
-        .map((it) =>
-          toItemSchema({
-            title: it.snippet.title,
-            url: `https://www.youtube.com/watch?v=${it.id.videoId}`,
-            source: ch.name || "YouTube",
-            type: "video",
-            region: ch.region || "global",
-            published_at: it.snippet.publishedAt || null,
-            image:
-              it.snippet.thumbnails?.high?.url ||
-              it.snippet.thumbnails?.medium?.url ||
-              it.snippet.thumbnails?.default?.url ||
-              null,
-            summary: stripHtml(it.snippet.description || ""),
-          })
-        );
-
-      all = all.concat(vids);
-    } catch (err) {
-      console.error("Error YouTube:", ch.name || ch.channelId, String(err.message || err));
+async function loadRssItems() {
+  const sources = await loadSourcesYaml();
+  const tasks = [];
+  for (const s of sources) {
+    // Nota: NO incluir fuentes de YouTube por RSS (tal como pediste)
+    if (!s || !s.type || !s.url) continue;
+    const kind = s.type.toLowerCase().trim();
+    if (kind === 'article' || kind === 'podcast') {
+      tasks.push(fetchFeed(s.url, kind, { source: s.source, region: s.region }));
     }
+  }
+  const results = await Promise.all(tasks);
+  return results.flat();
+}
+
+// ---------- YouTube ----------
+async function loadYouTubeItems() {
+  console.log('YouTube: verificando prerequisitos...');
+  const ytPath = path.resolve(ROOT, 'youtube_channels.json');
+  if (!YT_KEY) {
+    console.warn('YouTube: YT_API_KEY ausente -> se omite YouTube');
+    return [];
+  }
+  if (!fs.existsSync(ytPath)) {
+    console.warn('YouTube: youtube_channels.json no encontrado en raíz -> se omite YouTube');
+    return [];
+  }
+
+  let channels = [];
+  try {
+    channels = JSON.parse(fs.readFileSync(ytPath, 'utf8'));
+    if (!Array.isArray(channels)) throw new Error('Formato inválido (no array).');
+  } catch (e) {
+    console.warn(`YouTube: error leyendo youtube_channels.json :: ${e.message}`);
+    return [];
+  }
+
+  console.log(`YouTube: ${channels.length} canales`);
+
+  async function fetchChannelLatest(c) {
+    const url = new URL('https://www.googleapis.com/youtube/v3/search');
+    url.searchParams.set('key', YT_KEY);
+    url.searchParams.set('channelId', c.channelId);
+    url.searchParams.set('part', 'snippet');
+    url.searchParams.set('type', 'video');
+    url.searchParams.set('order', 'date');
+    url.searchParams.set('maxResults', '50'); // por página
+    // Puedes paginar si lo necesitas (nextPageToken), 50 suele bastar
+
+    let res;
+    try {
+      res = await fetch(url);
+    } catch (err) {
+      console.warn(`YouTube: canal ${c.name} -> error de red :: ${err.message}`);
+      return [];
+    }
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.warn(
+        `YouTube: canal ${c.name} -> HTTP ${res.status} ${res.statusText} :: ${text.slice(0, 200)}`
+      );
+      return [];
+    }
+
+    const data = await res.json();
+    const items = (data.items || []).map((v) =>
+      normalizeItem({
+        id: `yt:${v.id.videoId}`,
+        type: 'video',
+        url: `https://www.youtube.com/watch?v=${v.id.videoId}`,
+        title: v.snippet.title,
+        source: c.name,
+        region: c.region || 'global',
+        image:
+          v.snippet.thumbnails?.medium?.url ||
+          v.snippet.thumbnails?.high?.url ||
+          v.snippet.thumbnails?.default?.url ||
+          null,
+        published_at: v.snippet.publishedAt
+      })
+    );
+
+    console.log(`YouTube: canal ${c.name} -> ${items.length} videos`);
+    return items;
+  }
+
+  const all = [];
+  for (const c of channels) {
+    const got = await fetchChannelLatest(c);
+    all.push(...got);
   }
   return all;
 }
 
-// ---------- Main ----------
+// ---------- build ----------
 async function main() {
-  ensureDir(OUTPUT_DIR);
+  const started = Date.now();
+  console.log('==== Build start ====');
 
-  // 1) Artículos y podcasts (RSS)
-  const yamlRaw = fs.readFileSync(SOURCES_FILE, "utf-8");
-  const cfg = YAML.load(yamlRaw);
-  const sources = (cfg && cfg.sources) || [];
-  const collected = [];
+  // 1) RSS (artículos / podcasts)
+  const rssItems = await loadRssItems();
 
-  for (const s of sources) {
-    if (!s?.url) continue;
-    const feed = await parseFeed(s.url, s.name);
-    if (!feed?.items) continue;
+  // 2) YouTube (videos)
+  const ytItems = await loadYouTubeItems();
 
-    for (const e of feed.items) {
-      const link = e.link || e.id;
-      const title = String(e.title || "").trim();
-      if (!link || !title) continue;
+  // 3) merge + dedupe
+  let merged = dedupe([...rssItems, ...ytItems]);
 
-      const published = e.isoDate || e.pubDate || e.published || e.updated || null;
+  // 4) ordenar por fecha desc
+  merged.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
-      collected.push(
-        toItemSchema({
-          id: link,
-          title,
-          url: link,
-          source: s.name || hostnameOf(link) || hostnameOf(s.url),
-          type: s.type || "article",
-          region: s.region || "global",
-          published_at: published ? new Date(published).toISOString() : null,
-          image: firstImage(e),
-          summary: stripHtml(e.summary || e.contentSnippet || e.content || ""),
-        })
-      );
-    }
-  }
+  // 5) reservar cupo para videos
+  const videos = merged.filter((i) => i.type === 'video');
+  const others = merged.filter((i) => i.type !== 'video');
 
-  // 2) Videos de YouTube por API
-  const ytVideos = await fetchYouTubeVideos();
-  collected.push(...ytVideos);
+  // Selección priorizada: primero un bloque mínimo de videos recientes,
+  // luego completamos con el resto por fecha.
+  const prioritized = [
+    ...videos.slice(0, VIDEO_MIN),
+    ...others
+  ].sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
-  // 3) Deduplicar por URL
-  const map = new Map();
-  for (const it of collected) {
-    if (it?.url) map.set(it.url, it);
-  }
-  let items = Array.from(map.values());
+  const finalItems = prioritized.slice(0, MAX_ITEMS);
 
-  // 4) Ordenar por fecha
-  items.sort((a, b) => {
-    const ta = a.published_at ? Date.parse(a.published_at) : 0;
-    const tb = b.published_at ? Date.parse(b.published_at) : 0;
-    return tb - ta;
-  });
-
-  // 5) Limitar y escribir
-  items = items.slice(0, MAX_ITEMS);
-  const out = { updated_at: new Date().toISOString(), count: items.length, items };
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(out, null, 2), "utf8");
-
-  const byType = items.reduce((acc, it) => {
+  // 6) conteos
+  const counts = finalItems.reduce((acc, it) => {
     acc[it.type] = (acc[it.type] || 0) + 1;
     return acc;
   }, {});
-  console.log("Conteo por tipo:", byType);
-  console.log(`OK -> ${OUTPUT_FILE} items: ${items.length}`);
+  console.log(`Conteo por tipo: ${JSON.stringify(counts, null, 2)}`);
+  console.log(`OK -> docs/feed.json items: ${finalItems.length}`);
+
+  // 7) escribir archivo
+  if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+
+  fs.writeFileSync(
+    OUTPUT_FILE,
+    JSON.stringify(
+      {
+        generated_at: new Date().toISOString(),
+        total: finalItems.length,
+        items: finalItems
+      },
+      null,
+      2
+    ),
+    'utf8'
+  );
+
+  const ms = Date.now() - started;
+  console.log(`==== Build end (${ms} ms) ====`);
 }
 
 main().catch((e) => {
-  console.error(e);
+  console.error('Build failed:', e);
   process.exit(1);
 });
