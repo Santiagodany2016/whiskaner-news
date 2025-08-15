@@ -31,7 +31,8 @@ function normalizeItem(base) {
     title: (base.title || '').toString().trim(),
     source: base.source || '',
     region: base.region || 'global',
-    image: base.type === 'podcast' ? null : (base.image || base.enclosure?.url || null),
+    // Artículos: permitimos imagen; Podcasts: nunca imagen
+    image: (base.type === 'podcast') ? null : (base.image || base.enclosure?.url || null),
     published_at
   };
 }
@@ -108,6 +109,7 @@ async function main() {
 
   let merged = await loadRssItems();
 
+  // Garantizado: no videos
   merged = merged.filter((i) => i.type !== 'video');
 
   merged = dedupe(merged);
