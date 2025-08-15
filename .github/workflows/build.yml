@@ -1,60 +1,63 @@
-name: Build & Publish Whisky Feed
+name: Build & Publish Whiskaner News
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */2 * * *"   # se ejecuta cada 2 horas
+    - cron: "23 */6 * * *" # cada 6h, ajusta si quieres
 
 permissions:
   contents: write
 
-# Evita carreras (si lanzas otro build, cancela el anterior)
-concurrency:
-  group: whisky-news-feed
-  cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # 👇 MUY IMPORTANTE: expone el secret al job
+      YT_API_KEY: ${{ secrets.YT_API_KEY }}
+      NODE_OPTIONS: --max-old-space-size=4096
 
     steps:
-      - name: Checkout (full history)
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Node 20
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: 20
 
-      - name: Install deps
-        run: npm ci || npm i
+      # Si tu proyecto NO usa dependencias, deja esto como no-op.
+      # Si usas package.json con rss-parser/yaml/etc., descomenta:
+      - name: Install deps (optional)
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          else
+            echo "No package.json - skipping install"
+          fi
+
+      - name: Debug files/env
+        run: |
+          node -v
+          ls -la
+          echo "HAS_YT_KEY=$([ -n \"$YT_API_KEY\" ] && echo yes || echo no)"
+          test -f youtube_channels.json && echo "youtube_channels.json=FOUND" || echo "youtube_channels.json=MISSING"
 
       - name: Build feed.json
-        env:
-          YT_API_KEY: ${{ secrets.YT_API_KEY }}   # clave guardada en Settings → Secrets and variables → Actions
-        run: npm run build
-
-      - name: Configure git user
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          node scripts/build.js
+          echo "========== build.js finished =========="
 
-      - name: Add feed.json
+      - name: Commit changes if any
         run: |
-          git add docs/feed.json
-          git status --porcelain
-
-      - name: Commit (skip if no changes)
-        run: |
-          git commit -m "chore: update feed.json [skip ci]" || echo "Sin cambios"
-
-      - name: Rebase with remote main (avoid non-fast-forward)
-        run: |
-          git fetch origin main
-          git pull --rebase origin main || true
-
-      - name: Push
-        run: |
-          git push origin HEAD:main
+          if ! git diff --quiet -- docs/feed.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add docs/feed.json
+            git commit -m "chore(feed): update feed.json [skip ci]"
+            git push
+            echo "Committed docs/feed.json changes."
+          else
+            echo "No changes to commit."
+          fi
