@@ -1,7 +1,17 @@
 {
-  "generated_at": "2025-08-15T19:12:50.337Z",
+  "generated_at": "2025-08-15T19:28:40.870Z",
   "total": 800,
   "items": [
+    {
+      "id": "https://www.reddit.com/r/Scotch/comments/1mr7i39/review_19_glenlivet_18_by_signatory_vintage/",
+      "type": "article",
+      "url": "https://www.reddit.com/r/Scotch/comments/1mr7i39/review_19_glenlivet_18_by_signatory_vintage/",
+      "title": "Review #19 Glenlivet 18 by Signatory Vintage",
+      "source": "r/scotch",
+      "region": "global",
+      "image": null,
+      "published_at": "2025-08-15T19:19:17.000Z"
+    },
     {
       "id": "https://www.reddit.com/r/whisky/comments/1mr66dd/new_whisky_festival_coming_to_toronto/",
       "type": "article",
@@ -331,16 +341,6 @@
       "region": "global",
       "image": null,
       "published_at": "2025-08-13T17:19:21.000Z"
-    },
-    {
-      "id": "https://www.reddit.com/r/Scotch/comments/1mp7t3x/just_the_sip_glengoyne_legacy_series_chapter_two/",
-      "type": "article",
-      "url": "https://www.reddit.com/r/Scotch/comments/1mp7t3x/just_the_sip_glengoyne_legacy_series_chapter_two/",
-      "title": "Just the Sip: Glengoyne Legacy Series Chapter Two Review",
-      "source": "r/scotch",
-      "region": "global",
-      "image": null,
-      "published_at": "2025-08-13T15:37:48.000Z"
     },
     {
       "id": "https://www.reddit.com/r/whisky/comments/1mp3jvu/whisky_time_evolution_malaysian_international/",
