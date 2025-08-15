@@ -1,13 +1,12 @@
-/* build.js - Whiskaner News feed builder (solo RSS)
- * Node 20.x (tiene fetch global). Requiere:
- *   - rss-parser
- *   - yaml
- */
+// build.js - Whiskaner News feed builder (solo RSS, ESM)
+// Node 20.x (fetch global). Requiere deps:
+//   - "rss-parser"
+//   - "yaml"
 
-const fs = require('fs');
-const path = require('path');
-const YAML = require('yaml');
-const Parser = require('rss-parser');
+import fs from 'node:fs';
+import path from 'node:path';
+import YAML from 'yaml';
+import Parser from 'rss-parser';
 
 const parser = new Parser({
   timeout: 20000,
@@ -20,17 +19,19 @@ const OUTPUT_FILE = path.join(OUTPUT_DIR, 'feed.json');
 
 const MAX_ITEMS = parseInt(process.env.MAX_ITEMS || '800', 10);
 
+// ---------- utilidades ----------
 function safeDate(d) {
   const t = new Date(d);
-  return isNaN(t.getTime()) ? null : t.toISOString();
+  return Number.isNaN(t.getTime()) ? null : t.toISOString();
 }
 
 function normalizeItem(base) {
-  const published = base.published_at || base.pubDate || base.isoDate || base.date;
+  const published =
+    base.published_at || base.pubDate || base.isoDate || base.date;
   const published_at = safeDate(published) || new Date(0).toISOString();
   return {
     id: base.id || base.url || base.link,
-    type: base.type || 'article',               // article | podcast
+    type: base.type || 'article', // article | podcast
     url: base.url || base.link,
     title: (base.title || '').toString().trim(),
     source: base.source || '',
@@ -53,6 +54,7 @@ function dedupe(items) {
   return out;
 }
 
+// ---------- RSS (artículos / podcasts) ----------
 async function loadSourcesYaml() {
   const p = path.join(ROOT, 'sources.yaml');
   if (!fs.existsSync(p)) {
@@ -82,7 +84,9 @@ async function fetchFeed(url, kind, meta = {}) {
         published_at: it.isoDate || it.pubDate
       })
     );
-    console.log(`RSS: ${kind.padEnd(7)} -> ${items.length} items (${meta.source || url})`);
+    console.log(
+      `RSS: ${kind.padEnd(7)} -> ${items.length} items (${meta.source || url})`
+    );
     return items;
   } catch (e) {
     console.warn(`RSS: fallo al leer ${kind} :: ${url} :: ${e.message}`);
@@ -105,19 +109,22 @@ async function loadRssItems() {
   return results.flat();
 }
 
+// ---------- build ----------
 async function main() {
   const started = Date.now();
-  console.log('==== Build start (solo RSS) ====');
+  console.log('==== Build start (solo RSS, ESM) ====');
 
   // 1) RSS (artículos / podcasts)
   let merged = await loadRssItems();
 
-  // 2) Filtrar cualquier "video" que pueda colarse
-  merged = merged.filter(i => (i.type !== 'video'));
+  // 2) Filtrar cualquier "video" que pudiera colarse
+  merged = merged.filter((i) => i.type !== 'video');
 
   // 3) dedupe + ordenar
   merged = dedupe(merged);
-  merged.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
+  merged.sort(
+    (a, b) => new Date(b.published_at) - new Date(a.published_at)
+  );
 
   const finalItems = merged.slice(0, MAX_ITEMS);
 
@@ -149,7 +156,9 @@ async function main() {
   console.log(`==== Build end (${ms} ms) ====`);
 }
 
-main().catch((e) => {
+try {
+  await main();
+} catch (e) {
   console.error('Build failed:', e);
   process.exit(1);
-});
+}
