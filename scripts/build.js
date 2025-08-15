@@ -1,8 +1,4 @@
-// build.js - Whiskaner News feed builder (solo RSS, ESM)
-// Node 20.x (fetch global). Requiere deps:
-//   - "rss-parser"
-//   - "yaml"
-
+// build.js - Whiskaner News feed builder (solo RSS, ESM, sin imágenes en podcasts)
 import fs from 'node:fs';
 import path from 'node:path';
 import YAML from 'yaml';
@@ -19,7 +15,6 @@ const OUTPUT_FILE = path.join(OUTPUT_DIR, 'feed.json');
 
 const MAX_ITEMS = parseInt(process.env.MAX_ITEMS || '800', 10);
 
-// ---------- utilidades ----------
 function safeDate(d) {
   const t = new Date(d);
   return Number.isNaN(t.getTime()) ? null : t.toISOString();
@@ -31,12 +26,12 @@ function normalizeItem(base) {
   const published_at = safeDate(published) || new Date(0).toISOString();
   return {
     id: base.id || base.url || base.link,
-    type: base.type || 'article', // article | podcast
+    type: base.type || 'article',
     url: base.url || base.link,
     title: (base.title || '').toString().trim(),
     source: base.source || '',
     region: base.region || 'global',
-    image: base.image || base.enclosure?.url || null,
+    image: base.type === 'podcast' ? null : (base.image || base.enclosure?.url || null),
     published_at
   };
 }
@@ -54,7 +49,6 @@ function dedupe(items) {
   return out;
 }
 
-// ---------- RSS (artículos / podcasts) ----------
 async function loadSourcesYaml() {
   const p = path.join(ROOT, 'sources.yaml');
   if (!fs.existsSync(p)) {
@@ -75,7 +69,7 @@ async function fetchFeed(url, kind, meta = {}) {
     const feed = await parser.parseURL(url);
     const items = (feed.items || []).map((it) =>
       normalizeItem({
-        type: kind, // 'article' o 'podcast'
+        type: kind,
         url: it.link,
         title: it.title,
         source: meta.source || feed.title || '',
@@ -98,7 +92,6 @@ async function loadRssItems() {
   const sources = await loadSourcesYaml();
   const tasks = [];
   for (const s of sources) {
-    // Solo article/podcast (NO YouTube por RSS)
     if (!s || !s.type || !s.url) continue;
     const kind = s.type.toLowerCase().trim();
     if (kind === 'article' || kind === 'podcast') {
@@ -109,26 +102,19 @@ async function loadRssItems() {
   return results.flat();
 }
 
-// ---------- build ----------
 async function main() {
   const started = Date.now();
-  console.log('==== Build start (solo RSS, ESM) ====');
+  console.log('==== Build start (solo RSS, sin imágenes en podcasts) ====');
 
-  // 1) RSS (artículos / podcasts)
   let merged = await loadRssItems();
 
-  // 2) Filtrar cualquier "video" que pudiera colarse
   merged = merged.filter((i) => i.type !== 'video');
 
-  // 3) dedupe + ordenar
   merged = dedupe(merged);
-  merged.sort(
-    (a, b) => new Date(b.published_at) - new Date(a.published_at)
-  );
+  merged.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
   const finalItems = merged.slice(0, MAX_ITEMS);
 
-  // 4) conteos
   const counts = finalItems.reduce((acc, it) => {
     acc[it.type] = (acc[it.type] || 0) + 1;
     return acc;
@@ -136,7 +122,6 @@ async function main() {
   console.log(`Conteo por tipo: ${JSON.stringify(counts, null, 2)}`);
   console.log(`OK -> docs/feed.json items: ${finalItems.length}`);
 
-  // 5) escribir archivo
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   fs.writeFileSync(
     OUTPUT_FILE,
