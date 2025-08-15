@@ -3,7 +3,7 @@ name: Build & Publish Whiskaner News
 on:
   workflow_dispatch:
   schedule:
-    - cron: "23 */6 * * *" # cada 6h, ajusta si quieres
+    - cron: "23 */6 * * *" # cada 6h
 
 permissions:
   contents: write
@@ -12,9 +12,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # 👇 MUY IMPORTANTE: expone el secret al job
-      YT_API_KEY: ${{ secrets.YT_API_KEY }}
       NODE_OPTIONS: --max-old-space-size=4096
+      MAX_ITEMS: 800
 
     steps:
       - name: Checkout
@@ -27,8 +26,6 @@ jobs:
         with:
           node-version: 20
 
-      # Si tu proyecto NO usa dependencias, deja esto como no-op.
-      # Si usas package.json con rss-parser/yaml/etc., descomenta:
       - name: Install deps (optional)
         run: |
           if [ -f package.json ]; then
@@ -37,12 +34,11 @@ jobs:
             echo "No package.json - skipping install"
           fi
 
-      - name: Debug files/env
+      - name: Debug (no YouTube)
         run: |
           node -v
           ls -la
-          echo "HAS_YT_KEY=$([ -n \"$YT_API_KEY\" ] && echo yes || echo no)"
-          test -f youtube_channels.json && echo "youtube_channels.json=FOUND" || echo "youtube_channels.json=MISSING"
+          echo "Build sin YouTube"
 
       - name: Build feed.json
         run: |
@@ -55,7 +51,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add docs/feed.json
-            git commit -m "chore(feed): update feed.json [skip ci]"
+            git commit -m "chore(feed): update feed.json (rss-only) [skip ci]"
             git push
             echo "Committed docs/feed.json changes."
           else
